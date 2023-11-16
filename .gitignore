@@ -3,9 +3,11 @@ workdir/
 build/
 dist/
 __pycache__/
-python/opdb.egg-info/
+python/qadb.egg-info/
 alembic/test/db.cfg
 alembic/test/alembic/__pycache__/
-alembic/qadb_summit/db.cfg
-alembic/qadb_summit/alembic/__pycache__/
+alembic/qadb/db.cfg
+alembic/qadb/alembic/__pycache__/
+alembic/qadb_e2e/db.cfg
+alembic/qadb_e2e/alembic/__pycache__/
 .venv
