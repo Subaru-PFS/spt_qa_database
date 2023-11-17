@@ -172,6 +172,12 @@ class sky(Base):
                                   comment='the sigma of the sky background level (counts)')
     wavelength_ref = Column(REAL,
                             comment='the reference wavelength to measure the sky background level (nm)')
+    agc_background_mean = Column(REAL,
+                                 comment='the mean agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_median = Column(REAL,
+                                   comment='the median agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_sigma = Column(REAL,
+                                  comment='the sigma of the agc image background level (counts)')
 
     def __init__(self,
                  pfs_visit_id,
@@ -179,13 +185,18 @@ class sky(Base):
                  sky_background_median,
                  sky_background_sigma,
                  wavelength_ref,
+                 agc_background_mean,
+                 agc_background_median,
+                 agc_background_sigma,
                  ):
         self.pfs_visit_id = pfs_visit_id
         self.sky_background_mean = sky_background_mean
         self.sky_background_median = sky_background_median
         self.sky_background_sigma = sky_background_sigma
         self.wavelength_ref = wavelength_ref
-
+        self.agc_background_mean = agc_background_mean
+        self.agc_background_median = agc_background_median
+        self.agc_background_sigma = agc_background_sigma
 
 class telescope(Base):
     '''Information on the telescope status
