@@ -52,17 +52,21 @@ class seeing(Base):
     seeing_mean = Column(REAL, comment='seeing FWHM mean (arcsec.)')
     seeing_median = Column(REAL, comment='seeing FWHM median (arcsec.)')
     seeing_sigma = Column(REAL, comment='seeing FWHM sigma (arcsec.)')
+    wavelength_ref = Column(REAL,
+                            comment='the reference wavelength to measure the seeing (nm)')
 
     def __init__(self,
                  pfs_visit_id,
                  seeing_mean,
                  seeing_median,
                  seeing_sigma,
+                 wavelength_ref,
                  ):
         self.pfs_visit_id = pfs_visit_id
         self.seeing_mean = seeing_mean
         self.seeing_median = seeing_median
         self.seeing_sigma = seeing_sigma
+        self.wavelength_ref = wavelength_ref
 
 
 class transparency(Base):
@@ -75,41 +79,48 @@ class transparency(Base):
     transparency_mean = Column(REAL, comment='transparency mean')
     transparency_median = Column(REAL, comment='transparency median')
     transparency_sigma = Column(REAL, comment='transparency sigma')
+    wavelength_ref = Column(REAL,
+                            comment='the reference wavelength to measure the transparency (nm)')
 
     def __init__(self,
                  pfs_visit_id,
                  transparency_mean,
                  transparency_median,
                  transparency_sigma,
+                 wavelength_ref,
                  ):
         self.pfs_visit_id = pfs_visit_id
         self.transparency_mean = transparency_mean
         self.transparency_median = transparency_median
         self.transparency_sigma = transparency_sigma
+        self.wavelength_ref = wavelength_ref
 
 
 class throughput(Base):
-    '''Instrumental throughput for the visit
+    '''Total throughput for the visit
     '''
     __tablename__ = 'throughput'
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    throughput_mean = Column(REAL, comment='the instrumental throughput (mean)')
-    throughput_median = Column(REAL, comment='the instrumental throughput (median)')
-    throughput_sigma = Column(REAL, comment='the instrumental throughput (sigma)')
+    throughput_mean = Column(REAL, comment='the total throughput (mean)')
+    throughput_median = Column(REAL, comment='the total throughput (median)')
+    throughput_sigma = Column(REAL, comment='the total throughput (sigma)')
+    wavelength_ref = Column(REAL,
+                            comment='the reference wavelength to measure the total throughput (nm)')
 
     def __init__(self,
                  pfs_visit_id,
                  throughput_mean,
                  throughput_median,
                  throughput_sigma,
+                 wavelength_ref,
                  ):
         self.pfs_visit_id = pfs_visit_id
         self.throughput_mean = throughput_mean
         self.throughput_median = throughput_median
         self.throughput_sigma = throughput_sigma
-
+        self.wavelength_ref = wavelength_ref
 
 class noise(Base):
     '''Background noise level for the visit
@@ -121,17 +132,21 @@ class noise(Base):
     noise_mean = Column(REAL, comment='the background noise in electron/pix? (mean)')
     noise_median = Column(REAL, comment='the background noise in electron/pix? (median)')
     noise_sigma = Column(REAL, comment='the background noise in electron/pix? (sigma)')
+    wavelength_ref = Column(REAL,
+                            comment='the reference wavelength to measure the sky background noise (nm)')
 
     def __init__(self,
                  pfs_visit_id,
                  noise_mean,
                  noise_median,
                  noise_sigma,
+                 wavelength_ref,
                  ):
         self.pfs_visit_id = pfs_visit_id
         self.noise_mean = noise_mean
         self.noise_median = noise_median
         self.noise_sigma = noise_sigma
+        self.wavelength_ref = wavelength_ref
 
 
 class moon(Base):
@@ -172,6 +187,12 @@ class sky(Base):
                                   comment='the sigma of the sky background level (counts)')
     wavelength_ref = Column(REAL,
                             comment='the reference wavelength to measure the sky background level (nm)')
+    agc_background_mean = Column(REAL,
+                                 comment='the mean agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_median = Column(REAL,
+                                   comment='the median agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_sigma = Column(REAL,
+                                  comment='the sigma of the agc image background level (counts)')
 
     def __init__(self,
                  pfs_visit_id,
@@ -179,13 +200,18 @@ class sky(Base):
                  sky_background_median,
                  sky_background_sigma,
                  wavelength_ref,
+                 agc_background_mean,
+                 agc_background_median,
+                 agc_background_sigma,
                  ):
         self.pfs_visit_id = pfs_visit_id
         self.sky_background_mean = sky_background_mean
         self.sky_background_median = sky_background_median
         self.sky_background_sigma = sky_background_sigma
         self.wavelength_ref = wavelength_ref
-
+        self.agc_background_mean = agc_background_mean
+        self.agc_background_median = agc_background_median
+        self.agc_background_sigma = agc_background_sigma
 
 class telescope(Base):
     '''Information on the telescope status
@@ -289,7 +315,7 @@ class exposure_time(Base):
         self.effective_exposure_time = effective_exposure_time
 
 
-''' DRP QA tables '''
+## DRP QA tables ##
 
 class data_processing(Base):
     '''Information of the pipeline processing
@@ -381,8 +407,6 @@ class data_qa(Base):
         self.process_datetime_start = process_datetime_start
         self.process_datetime_end = process_datetime_end
 
-
-''' 2D DRP '''
 
 class detector_map(Base):
     '''Quality of the detectorMap for the visit
