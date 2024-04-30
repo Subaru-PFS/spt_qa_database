@@ -10,7 +10,8 @@ Base = declarative_base()
 class test(Base):
     __tablename__ = 'test'
 
-    test_id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
+    test_id = Column(Integer, primary_key=True,
+                     unique=True, autoincrement=True)
     test_val1 = Column(Integer, comment='test_val1')
     test_val2 = Column(REAL, comment='test_val2')
     test_val3 = Column(String, comment='test_val3')
@@ -30,7 +31,8 @@ class pfs_visit(Base):
     '''
     __tablename__ = 'pfs_visit'
 
-    pfs_visit_id = Column(Integer, primary_key=True, unique=True, autoincrement=False)
+    pfs_visit_id = Column(Integer, primary_key=True,
+                          unique=True, autoincrement=False)
     pfs_visit_description = Column(String)
     pfs_design_id = Column(BigInteger)
     issued_at = Column(DateTime, comment='Issued time [YYYY-MM-DDThh:mm:ss]')
@@ -43,7 +45,7 @@ class pfs_visit(Base):
 
 
 class seeing(Base):
-    '''Statistics of seeing during a single exposure
+    '''Statistics of seeing during a single SpS exposure
     '''
     __tablename__ = 'seeing'
 
@@ -69,8 +71,43 @@ class seeing(Base):
         self.wavelength_ref = wavelength_ref
 
 
+class seeing_agc_exposure(Base):
+    '''Statistics of seeing during a single AGC exposure
+    '''
+    __tablename__ = 'seeing_agc_exposure'
+    __table_args__ = (UniqueConstraint('pfs_visit_id', 'agc_exposure_id'), {})
+
+    pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True, autoincrement=False)
+    agc_exposure_id = Column(Integer, autoincrement=False)
+    seeing_mean = Column(REAL, comment='seeing FWHM mean (arcsec.)')
+    seeing_median = Column(REAL, comment='seeing FWHM median (arcsec.)')
+    seeing_sigma = Column(REAL, comment='seeing FWHM sigma (arcsec.)')
+    wavelength_ref = Column(
+        REAL, comment='the reference wavelength to measure the seeing (nm)')
+    taken_at = Column(
+        DateTime, comment='The time at which the exposure was taken [YYYY-MM-DDThh-mm-sss]')
+
+    def __init__(self,
+                 pfs_visit_id,
+                 agc_exposure_id,
+                 seeing_mean,
+                 seeing_median,
+                 seeing_sigma,
+                 wavelength_ref,
+                 taken_at,
+                 ):
+        self.pfs_visit_id = pfs_visit_id
+        self.agc_exposure_id = agc_exposure_id
+        self.seeing_mean = seeing_mean
+        self.seeing_median = seeing_median
+        self.seeing_sigma = seeing_sigma
+        self.wavelength_ref = wavelength_ref
+        self.taken_at = taken_at
+
+
 class transparency(Base):
-    '''Statistics of transparency during a single exposure
+    '''Statistics of transparency during a single SpS exposure
     '''
     __tablename__ = 'transparency'
 
@@ -94,6 +131,42 @@ class transparency(Base):
         self.transparency_median = transparency_median
         self.transparency_sigma = transparency_sigma
         self.wavelength_ref = wavelength_ref
+
+
+class transparency_agc_exposure(Base):
+    '''Statistics of transparency during a single AGC exposure
+    '''
+    __tablename__ = 'transparency_agc_exposure'
+    __table_args__ = (UniqueConstraint('pfs_visit_id', 'agc_exposure_id'), {})
+
+    pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True, autoincrement=False)
+    agc_exposure_id = Column(Integer,
+                             primary_key=True, autoincrement=False)
+    transparency_mean = Column(REAL, comment='transparency mean')
+    transparency_median = Column(REAL, comment='transparency median')
+    transparency_sigma = Column(REAL, comment='transparency sigma')
+    wavelength_ref = Column(REAL,
+                            comment='the reference wavelength to measure the transparency (nm)')
+    taken_at = Column(
+        DateTime, comment='The time at which the exposure was taken [YYYY-MM-DDThh-mm-sss]')
+
+    def __init__(self,
+                 pfs_visit_id,
+                 agc_exposure_id,
+                 transparency_mean,
+                 transparency_median,
+                 transparency_sigma,
+                 wavelength_ref,
+                 taken_at,
+                 ):
+        self.pfs_visit_id = pfs_visit_id
+        self.agc_exposure_id = agc_exposure_id
+        self.transparency_mean = transparency_mean
+        self.transparency_median = transparency_median
+        self.transparency_sigma = transparency_sigma
+        self.wavelength_ref = wavelength_ref
+        self.taken_at = taken_at
 
 
 class throughput(Base):
@@ -122,6 +195,7 @@ class throughput(Base):
         self.throughput_sigma = throughput_sigma
         self.wavelength_ref = wavelength_ref
 
+
 class noise(Base):
     '''Background noise level for the visit
     '''
@@ -129,9 +203,12 @@ class noise(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    noise_mean = Column(REAL, comment='the background noise in electron/pix? (mean)')
-    noise_median = Column(REAL, comment='the background noise in electron/pix? (median)')
-    noise_sigma = Column(REAL, comment='the background noise in electron/pix? (sigma)')
+    noise_mean = Column(
+        REAL, comment='the background noise in electron/pix? (mean)')
+    noise_median = Column(
+        REAL, comment='the background noise in electron/pix? (median)')
+    noise_sigma = Column(
+        REAL, comment='the background noise in electron/pix? (sigma)')
     wavelength_ref = Column(REAL,
                             comment='the reference wavelength to measure the sky background noise (nm)')
 
@@ -213,6 +290,7 @@ class sky(Base):
         self.agc_background_median = agc_background_median
         self.agc_background_sigma = agc_background_sigma
 
+
 class telescope(Base):
     '''Information on the telescope status
     '''
@@ -220,9 +298,12 @@ class telescope(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    azimuth = Column(REAL, comment='the average telescope azimuth during the exposure (deg.)')
-    altitude = Column(REAL, comment='the average telescope altitude during the exposure (deg.)')
-    airmass = Column(REAL, comment='the average airmass during the exposure (deg.)')
+    azimuth = Column(
+        REAL, comment='the average telescope azimuth during the exposure (deg.)')
+    altitude = Column(
+        REAL, comment='the average telescope altitude during the exposure (deg.)')
+    airmass = Column(
+        REAL, comment='the average airmass during the exposure (deg.)')
 
     def __init__(self,
                  pfs_visit_id,
@@ -243,7 +324,8 @@ class cobra_convergence(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    number_converged = Column(Integer, comment='the number of converged targets within the threshold')
+    number_converged = Column(
+        Integer, comment='the number of converged targets within the threshold')
     residual_mean = Column(REAL,
                            comment='the mean residual of fiber configuration (um)')
     residual_median = Column(REAL,
@@ -272,13 +354,14 @@ class guide_offset(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    number_guide_stars = Column(Integer, comment='the number of guide targets used')
+    number_guide_stars = Column(
+        Integer, comment='the number of guide targets used')
     offset_mean = Column(REAL,
-                           comment='the mean guide offset during the exposure (arcsec)')
+                         comment='the mean guide offset during the exposure (arcsec)')
     offset_median = Column(REAL,
-                             comment='the median guide offset during the exposure (arcsec)')
+                           comment='the median guide offset during the exposure (arcsec)')
     offset_sigma = Column(REAL,
-                            comment='the sigma of the guide offset during the exposure (arcsec)')
+                          comment='the sigma of the guide offset during the exposure (arcsec)')
 
     def __init__(self,
                  pfs_visit_id,
@@ -301,7 +384,8 @@ class exposure_time(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    nominal_exposure_time = Column(REAL, comment='the nominal exposure time (sec.)')
+    nominal_exposure_time = Column(
+        REAL, comment='the nominal exposure time (sec.)')
     effective_exposure_time = Column(REAL,
                                      comment='the effective exposure time inferred with the observed condition (sec.)')
 
@@ -332,11 +416,11 @@ class data_processing(Base):
     drp_version = Column(String,
                          comment='DRP version (e.g., w.2023.20 (DRP2D), 0.40.0 (DRP1D) )')
     process_type = Column(String,
-                         comment='the type of DRP processing (e.g., reduceExposure, mergeArms, etc.)')
+                          comment='the type of DRP processing (e.g., reduceExposure, mergeArms, etc.)')
     process_datetime_start = Column(DateTime,
-                                comment='datetime of the processing run start')
+                                    comment='datetime of the processing run start')
     process_datetime_end = Column(DateTime,
-                              comment='datetime of the processing run end')
+                                  comment='datetime of the processing run end')
 
     def __init__(self,
                  pfs_visit_id,
@@ -352,6 +436,7 @@ class data_processing(Base):
         self.process_type = process_type
         self.process_datetime_start = process_datetime_start
         self.process_datetime_end = process_datetime_end
+
 
 class data_processing_results(Base):
     '''Information on the data processing results
@@ -373,6 +458,7 @@ class data_processing_results(Base):
         self.run_id = run_id
         self.tbd = tbd
 
+
 class data_qa(Base):
     '''Information of the pipeline processing
     '''
@@ -384,13 +470,13 @@ class data_qa(Base):
                     autoincrement=True)
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'))
     qa_version = Column(String,
-                         comment='QA code version (e.g., xxxxx)')
+                        comment='QA code version (e.g., xxxxx)')
     qa_type = Column(String,
-                         comment='the type of QA processing (e.g., detectorMap, fluxCalibrate, etc.)')
+                     comment='the type of QA processing (e.g., detectorMap, fluxCalibrate, etc.)')
     process_datetime_start = Column(DateTime,
-                                comment='datetime of the processing run start')
+                                    comment='datetime of the processing run start')
     process_datetime_end = Column(DateTime,
-                              comment='datetime of the processing run end')
+                                  comment='datetime of the processing run end')
 
     def __init__(self,
                  pfs_visit_id,
@@ -436,7 +522,7 @@ class detector_map(Base):
     residual_wavelength_sigma = Column(REAL,
                                        comment='the sigma of the wavelength residual averaged over fibers (nm)')
     residual_trace_mean = Column(REAL,
-                                comment='the mean wavelength residual averaged over fibers (nm)')
+                                 comment='the mean wavelength residual averaged over fibers (nm)')
     residual_trace_median = Column(REAL,
                                    comment='the median wavelength residual averaged over fibers (nm)')
     residual_trace_sigma = Column(REAL,
@@ -506,7 +592,7 @@ class sky_subtraction(Base):
         self.residual_chi_mean = residual_chi_mean
         self.residual_chi_median = residual_chi_median
         self.residual_chi_sigma = residual_chi_sigma
-        
+
 
 class flux_calibration(Base):
     '''Quality of the flux calibration for the visit
@@ -613,6 +699,7 @@ class mask(Base):
         self.arm = arm
         self.number_of_pix_in_each_bit = number_of_pix_in_each_bit
 
+
 class h4_persistence(Base):
     '''Quality of the H4RG persistence correction for the visit
     '''
@@ -659,9 +746,9 @@ class dichroic_continuity(Base):
                           autoincrement=False
                           )
     br_continuity = Column(REAL,
-                    comment='TBD')
+                           comment='TBD')
     rn_continuity = Column(REAL,
-                    comment='TBD')
+                           comment='TBD')
 
     def __init__(self,
                  run_id,
@@ -673,7 +760,7 @@ class dichroic_continuity(Base):
         self.spectrograph = spectrograph
         self.br_continuity = br_continuity
         self.rn_continuity = rn_continuity
-        
+
 
 ''' 1D DRP '''
 
