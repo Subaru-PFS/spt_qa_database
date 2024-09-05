@@ -176,25 +176,59 @@ class throughput(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    throughput_mean = Column(REAL, comment='the total throughput (mean)')
-    throughput_median = Column(REAL, comment='the total throughput (median)')
-    throughput_sigma = Column(REAL, comment='the total throughput (sigma)')
-    wavelength_ref = Column(REAL,
-                            comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_b_mean = Column(REAL, comment='the total throughput in b-arm (mean)')
+    throughput_b_median = Column(REAL, comment='the total throughput in b-arm (median)')
+    throughput_b_sigma = Column(REAL, comment='the total throughput in b-arm (sigma)')
+    wavelength_ref_b = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_r_mean = Column(REAL, comment='the total throughput in r-arm (mean)')
+    throughput_r_median = Column(REAL, comment='the total throughput in r-arm (median)')
+    throughput_r_sigma = Column(REAL, comment='the total throughput in r-arm (sigma)')
+    wavelength_ref_r = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_n_mean = Column(REAL, comment='the total throughput in n-arm (mean)')
+    throughput_n_median = Column(REAL, comment='the total throughput in n-arm (median)')
+    throughput_n_sigma = Column(REAL, comment='the total throughput in n-arm (sigma)')
+    wavelength_ref_n = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_m_mean = Column(REAL, comment='the total throughput in m-arm (mean)')
+    throughput_m_median = Column(REAL, comment='the total throughput in m-arm (median)')
+    throughput_m_sigma = Column(REAL, comment='the total throughput in m-arm (sigma)')
+    wavelength_ref_m = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
 
     def __init__(self,
-                 pfs_visit_id,
-                 throughput_mean,
-                 throughput_median,
-                 throughput_sigma,
-                 wavelength_ref,
-                 ):
+                pfs_visit_id,
+                throughput_b_mean,
+                throughput_b_median,
+                throughput_b_sigma,
+                wavelength_ref_b,
+                throughput_r_mean,
+                throughput_r_median,
+                throughput_r_sigma,
+                wavelength_ref_r,
+                throughput_n_mean,
+                throughput_n_median,
+                throughput_n_sigma,
+                wavelength_ref_n,
+                throughput_m_mean,
+                throughput_m_median,
+                throughput_m_sigma,
+                wavelength_ref_m,
+                ):
         self.pfs_visit_id = pfs_visit_id
-        self.throughput_mean = throughput_mean
-        self.throughput_median = throughput_median
-        self.throughput_sigma = throughput_sigma
-        self.wavelength_ref = wavelength_ref
-
+        self.throughput_b_mean = throughput_b_mean
+        self.throughput_b_median = throughput_b_median
+        self.throughput_b_sigma = throughput_b_sigma
+        self.wavelength_ref_b = wavelength_ref_b
+        self.throughput_r_mean = throughput_r_mean
+        self.throughput_r_median = throughput_r_median
+        self.throughput_r_sigma = throughput_r_sigma
+        self.wavelength_ref_r = wavelength_ref_r
+        self.throughput_n_mean = throughput_n_mean
+        self.throughput_n_median = throughput_n_median
+        self.throughput_n_sigma = throughput_n_sigma
+        self.wavelength_ref_n = wavelength_ref_n
+        self.throughput_m_mean = throughput_m_mean
+        self.throughput_m_median = throughput_m_median
+        self.throughput_m_sigma = throughput_m_sigma
+        self.wavelength_ref_m = wavelength_ref_m
 
 class noise(Base):
     '''Background noise level for the visit
@@ -203,28 +237,59 @@ class noise(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    noise_mean = Column(
-        REAL, comment='the background noise in electron/pix? (mean)')
-    noise_median = Column(
-        REAL, comment='the background noise in electron/pix? (median)')
-    noise_sigma = Column(
-        REAL, comment='the background noise in electron/pix? (sigma)')
-    wavelength_ref = Column(REAL,
-                            comment='the reference wavelength to measure the sky background noise (nm)')
+    noise_b_mean = Column(REAL, comment='the background noise in b-arm in electron/pix (mean)')
+    noise_b_median = Column(REAL, comment='the background noise in b-arm electron/pix (median)')
+    noise_b_sigma = Column(REAL, comment='the background noise in b-arm electron/pix? (sigma)')
+    wavelength_ref_b = Column(REAL, comment='the reference wavelength to measure the sky background noise in b-arm (nm)')
+    noise_r_mean = Column(REAL, comment='the background noise in r-arm in electron/pix (mean)')
+    noise_r_median = Column(REAL, comment='the background noise in r-arm electron/pix (median)')
+    noise_r_sigma = Column(REAL, comment='the background noise in r-arm electron/pix? (sigma)')
+    wavelength_ref_r = Column(REAL, comment='the reference wavelength to measure the sky background noise in r-arm (nm)')
+    noise_n_mean = Column(REAL, comment='the background noise in n-arm in electron/pix (mean)')
+    noise_n_median = Column(REAL, comment='the background noise in n-arm electron/pix (median)')
+    noise_n_sigma = Column(REAL, comment='the background noise in n-arm electron/pix? (sigma)')
+    wavelength_ref_n = Column(REAL, comment='the reference wavelength to measure the sky background noise in n-arm (nm)')
+    noise_m_mean = Column(REAL, comment='the background noise in m-arm in electron/pix (mean)')
+    noise_m_median = Column(REAL, comment='the background noise in m-arm electron/pix (median)')
+    noise_m_sigma = Column(REAL, comment='the background noise in m-arm electron/pix? (sigma)')
+    wavelength_ref_m = Column(REAL, comment='the reference wavelength to measure the sky background noise in m-arm (nm)')
 
     def __init__(self,
                  pfs_visit_id,
-                 noise_mean,
-                 noise_median,
-                 noise_sigma,
-                 wavelength_ref,
+                 noise_b_mean,
+                 noise_b_median,
+                 noise_b_sigma,
+                 wavelength_ref_b,
+                 noise_r_mean,
+                 noise_r_median,
+                 noise_r_sigma,
+                 wavelength_ref_r,
+                 noise_n_mean,
+                 noise_n_median,
+                 noise_n_sigma,
+                 wavelength_ref_n,
+                 noise_m_mean,
+                 noise_m_median,
+                 noise_m_sigma,
+                 wavelength_ref_m,
                  ):
         self.pfs_visit_id = pfs_visit_id
-        self.noise_mean = noise_mean
-        self.noise_median = noise_median
-        self.noise_sigma = noise_sigma
-        self.wavelength_ref = wavelength_ref
-
+        self.noise_b_mean = noise_b_mean
+        self.noise_b_median = noise_b_median
+        self.noise_b_sigma = noise_b_sigma
+        self.wavelength_ref_b = wavelength_ref_b
+        self.noise_r_mean = noise_r_mean
+        self.noise_r_median = noise_r_median
+        self.noise_r_sigma = noise_r_sigma
+        self.wavelength_ref_r = wavelength_ref_r
+        self.noise_n_mean = noise_n_mean
+        self.noise_n_median = noise_n_median
+        self.noise_n_sigma = noise_n_sigma
+        self.wavelength_ref_n = wavelength_ref_n
+        self.noise_m_mean = noise_m_mean
+        self.noise_m_median = noise_m_median
+        self.noise_m_sigma = noise_m_sigma
+        self.wavelength_ref_m = wavelength_ref_m
 
 class moon(Base):
     '''Information on the moon for the visit
@@ -256,40 +321,68 @@ class sky(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    sky_background_mean = Column(REAL,
-                                 comment='the mean sky background level averaged over the FoV/fibers (counts)')
-    sky_background_median = Column(REAL,
-                                   comment='the median sky background level averaged over the FoV/fibers (counts)')
-    sky_background_sigma = Column(REAL,
-                                  comment='the sigma of the sky background level (counts)')
-    wavelength_ref = Column(REAL,
-                            comment='the reference wavelength to measure the sky background level (nm)')
-    agc_background_mean = Column(REAL,
-                                 comment='the mean agc image background level averaged over the FoV/fibers (counts)')
-    agc_background_median = Column(REAL,
-                                   comment='the median agc image background level averaged over the FoV/fibers (counts)')
-    agc_background_sigma = Column(REAL,
-                                  comment='the sigma of the agc image background level (counts)')
+    sky_background_b_mean = Column(REAL, comment='the mean sky background level in b-arm averaged over the FoV/fibers (counts)')
+    sky_background_b_median = Column(REAL, comment='the median sky background level in b-arm averaged over the FoV/fibers (counts)')
+    sky_background_b_sigma = Column(REAL, comment='the sigma of the sky background level in b-arm (counts)')
+    wavelength_ref_b = Column(REAL, comment='the reference wavelength to measure the sky background level in b-arm (nm)')
+    sky_background_r_mean = Column(REAL, comment='the mean sky background level in r-arm averaged over the FoV/fibers (counts)')
+    sky_background_r_median = Column(REAL, comment='the median sky background level in r-arm averaged over the FoV/fibers (counts)')
+    sky_background_r_sigma = Column(REAL, comment='the sigma of the sky background level in r-arm (counts)')
+    wavelength_ref_r = Column(REAL, comment='the reference wavelength to measure the sky background level in r-arm (nm)')
+    sky_background_n_mean = Column(REAL, comment='the mean sky background level in n-arm averaged over the FoV/fibers (counts)')
+    sky_background_n_median = Column(REAL, comment='the median sky background level in n-arm averaged over the FoV/fibers (counts)')
+    sky_background_n_sigma = Column(REAL, comment='the sigma of the sky background level in n-arm (counts)')
+    wavelength_ref_n = Column(REAL, comment='the reference wavelength to measure the sky background level in n-arm (nm)')
+    sky_background_m_mean = Column(REAL, comment='the mean sky background level in m-arm averaged over the FoV/fibers (counts)')
+    sky_background_m_median = Column(REAL, comment='the median sky background level in m-arm averaged over the FoV/fibers (counts)')
+    sky_background_m_sigma = Column(REAL, comment='the sigma of the sky background level in m-arm (counts)')
+    wavelength_ref_m = Column(REAL, comment='the reference wavelength to measure the sky background level in m-arm (nm)')
+    agc_background_mean = Column(REAL, comment='the mean agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_median = Column(REAL, comment='the median agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_sigma = Column(REAL, comment='the sigma of the agc image background level (counts)')
 
     def __init__(self,
                  pfs_visit_id,
-                 sky_background_mean,
-                 sky_background_median,
-                 sky_background_sigma,
-                 wavelength_ref,
+                 sky_background_b_mean,
+                 sky_background_b_median,
+                 sky_background_b_sigma,
+                 wavelength_ref_b,
+                 sky_background_r_mean,
+                 sky_background_r_median,
+                 sky_background_r_sigma,
+                 wavelength_ref_r,
+                 sky_background_n_mean,
+                 sky_background_n_median,
+                 sky_background_n_sigma,
+                 wavelength_ref_n,
+                 sky_background_m_mean,
+                 sky_background_m_median,
+                 sky_background_m_sigma,
+                 wavelength_ref_m,
                  agc_background_mean,
                  agc_background_median,
                  agc_background_sigma,
                  ):
         self.pfs_visit_id = pfs_visit_id
-        self.sky_background_mean = sky_background_mean
-        self.sky_background_median = sky_background_median
-        self.sky_background_sigma = sky_background_sigma
-        self.wavelength_ref = wavelength_ref
+        self.sky_background_b_mean = sky_background_b_mean
+        self.sky_background_b_median = sky_background_b_median
+        self.sky_background_b_sigma = sky_background_b_sigma
+        self.wavelength_ref_b = wavelength_ref_b
+        self.sky_background_r_mean = sky_background_r_mean
+        self.sky_background_r_median = sky_background_r_median
+        self.sky_background_r_sigma = sky_background_r_sigma
+        self.wavelength_ref_r = wavelength_ref_r
+        self.sky_background_n_mean = sky_background_n_mean
+        self.sky_background_n_median = sky_background_n_median
+        self.sky_background_n_sigma = sky_background_n_sigma
+        self.wavelength_ref_n = wavelength_ref_n
+        self.sky_background_m_mean = sky_background_m_mean
+        self.sky_background_m_median = sky_background_m_median
+        self.sky_background_m_sigma = sky_background_m_sigma
+        self.wavelength_ref_m = wavelength_ref_m
         self.agc_background_mean = agc_background_mean
         self.agc_background_median = agc_background_median
         self.agc_background_sigma = agc_background_sigma
-
 
 class telescope(Base):
     '''Information on the telescope status
@@ -386,18 +479,29 @@ class exposure_time(Base):
                           primary_key=True, unique=True, autoincrement=False)
     nominal_exposure_time = Column(
         REAL, comment='the nominal exposure time (sec.)')
-    effective_exposure_time = Column(REAL,
-                                     comment='the effective exposure time inferred with the observed condition (sec.)')
+    effective_exposure_time_b = Column(REAL,
+                                       comment='the effective exposure time inferred with the observed condition in b-arm (sec.)')
+    effective_exposure_time_r = Column(REAL,
+                                       comment='the effective exposure time inferred with the observed condition in r-arm (sec.)')
+    effective_exposure_time_n = Column(REAL,
+                                       comment='the effective exposure time inferred with the observed condition in n-arm (sec.)')
+    effective_exposure_time_m = Column(REAL,
+                                       comment='the effective exposure time inferred with the observed condition in m-arm (sec.)')
 
     def __init__(self,
                  pfs_visit_id,
                  nominal_exposure_time,
-                 effective_exposure_time,
+                 effective_exposure_time_b,
+                 effective_exposure_time_r,
+                 effective_exposure_time_n,
+                 effective_exposure_time_m,
                  ):
         self.pfs_visit_id = pfs_visit_id
         self.nominal_exposure_time = nominal_exposure_time
-        self.effective_exposure_time = effective_exposure_time
-
+        self.effective_exposure_time_b = effective_exposure_time_b
+        self.effective_exposure_time_r = effective_exposure_time_r
+        self.effective_exposure_time_n = effective_exposure_time_n
+        self.effective_exposure_time_m = effective_exposure_time_m
 
 ## DRP QA tables ##
 
