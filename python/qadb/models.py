@@ -648,6 +648,7 @@ class calibs(Base):
     calib_id = Column(Integer, primary_key=True, unique=True, autoincrement=True, comment="CLAIBs ID")
     calib_name = Column(String, comment="the name of CALIB (e.g. CALIB-2024-07-v1)")
     calib_description = Column(String, comment="the description of CALIB")
+    drp_version = Column(String, comment="DRP2D version (e.g., w.2023.20)")
     generated_at = Column(DateTime, comment="the type of calibration")
 
     def __init__(
@@ -655,11 +656,13 @@ class calibs(Base):
         calib_id,
         calib_name,
         calib_description,
+        drp_version,
         generated_at,
     ):
         self.calib_id = calib_id
         self.calib_name = calib_name
         self.calib_description = calib_description
+        self.drp_version = drp_version
         self.generated_at = generated_at
 
 
@@ -675,21 +678,36 @@ class calibs_qa(Base):
         autoincrement=True,
     )
     calib_id = Column(Integer, ForeignKey("calibs.calib_id"), comment="CLAIBs ID")
+    drp_qa_version = Column(String, comment="drp_qa version (e.g., w.2024.33)")
     bias_qa = Column(REAL, comment="QA for bias")
     dark_qa = Column(REAL, comment="QA for dark")
     detectormap_qa = Column(REAL, comment="QA for detectorMap")
     fiberprofiles_qa = Column(REAL, comment="QA for fiberProfiles")
     fibernorms_qa = Column(REAL, comment="QA for fiberNorms")
+    processed_at = Column(DateTime, comment="datetime of the QA processing")
+    status = Column(Integer, comment="QA processing status")
 
     def __init__(
         self,
-        qa_id,
         calib_id,
+        drp_qa_version,
+        bias_qa,
+        dark_qa,
         detectormap_qa,
+        fiberprofiles_qa,
+        fibernorms_qa,
+        processed_at,
+        status,
     ):
-        self.qa_id = qa_id
         self.calib_id = calib_id
+        self.drp_qa_version = drp_qa_version
+        self.bias_qa = bias_qa
+        self.dark_qa = dark_qa
         self.detectormap_qa = detectormap_qa
+        self.fiberprofiles_qa = fiberprofiles_qa
+        self.fibernorms_qa = fibernorms_qa
+        self.processed_at = processed_at
+        self.status = status
 
 
 class calibs_qa_detector(Base):
@@ -814,6 +832,8 @@ class detectormap_qa(Base):
     )
     pfs_visit_id = Column(Integer, comment="pfs_visit_id")
     drp_qa_version = Column(String, comment="drp_qa version (e.g., w.2024.33)")
+    processed_at = Column(DateTime, comment="datetime of the QA processing")
+    status = Column(Integer, comment="QA processing status")
     residual_wavelength_mean = Column(REAL, comment="the mean wavelength residual averaged over fibers (nm)")
     residual_wavelength_median = Column(REAL, comment="the median wavelength residual averaged over fibers (nm)")
     residual_wavelength_sigma = Column(REAL, comment="the sigma of the wavelength residual averaged over fibers (nm)")
@@ -826,6 +846,8 @@ class detectormap_qa(Base):
         processing_id,
         pfs_visit_id,
         drp_qa_version,
+        processed_at,
+        status,
         residual_wavelength_mean,
         residual_wavelength_median,
         residual_wavelength_sigma,
@@ -836,6 +858,8 @@ class detectormap_qa(Base):
         self.processing_id = processing_id
         self.pfs_visit_id = pfs_visit_id
         self.drp_qa_version = drp_qa_version
+        self.processed_at = processed_at
+        self.status = status
         self.residual_wavelength_mean = residual_wavelength_mean
         self.residual_wavelength_median = residual_wavelength_median
         self.residual_wavelength_sigma = residual_wavelength_sigma
@@ -953,6 +977,8 @@ class extraction_qa(Base):
     )
     pfs_visit_id = Column(Integer, comment="pfs_visit_id")
     drp_qa_version = Column(String, comment="drp_qa version (e.g., w.2024.33)")
+    processed_at = Column(DateTime, comment="datetime of the QA processing")
+    status = Column(Integer, comment="QA processing status")
     number_of_extracted_fibers = Column(Integer, comment="the number of the number of extracted fibers")
     residual_chi_mean = Column(
         REAL,
@@ -969,6 +995,8 @@ class extraction_qa(Base):
         processing_id,
         pfs_visit_id,
         drp_qa_version,
+        processed_at,
+        status,
         number_of_extracted_fibers,
         residual_chi_mean,
         residual_chi_median,
@@ -977,6 +1005,8 @@ class extraction_qa(Base):
         self.processing_id = processing_id
         self.pfs_visit_id = pfs_visit_id
         self.drp_qa_version = drp_qa_version
+        self.processed_at = processed_at
+        self.status = status
         self.number_of_extracted_fibers = number_of_extracted_fibers
         self.residual_chi_mean = residual_chi_mean
         self.residual_chi_median = residual_chi_median
@@ -1043,6 +1073,8 @@ class sky_subtraction_qa(Base):
     )
     pfs_visit_id = Column(Integer, comment="pfs_visit_id")
     drp_qa_version = Column(String, comment="drp_qa version (e.g., w.2024.33)")
+    processed_at = Column(DateTime, comment="datetime of the QA processing")
+    status = Column(Integer, comment="QA processing status")
     number_of_sky_fibers = Column(Integer, comment="the number of sky fibers to make the sky model")
     residual_chi_mean = Column(
         REAL,
@@ -1059,6 +1091,8 @@ class sky_subtraction_qa(Base):
         processing_id,
         pfs_visit_id,
         drp_qa_version,
+        processed_at,
+        status,
         number_of_sky_fibers,
         residual_chi_mean,
         residual_chi_median,
@@ -1067,6 +1101,8 @@ class sky_subtraction_qa(Base):
         self.processing_id = processing_id
         self.pfs_visit_id = pfs_visit_id
         self.drp_qa_version = drp_qa_version
+        self.processed_at = processed_at
+        self.status = status
         self.number_of_sky_fibers = number_of_sky_fibers
         self.residual_chi_mean = residual_chi_mean
         self.residual_chi_median = residual_chi_median
@@ -1133,6 +1169,8 @@ class flux_calibration_qa(Base):
     )
     pfs_visit_id = Column(Integer, comment="pfs_visit_id")
     drp_qa_version = Column(String, comment="drp_qa version (e.g., w.2024.33)")
+    processed_at = Column(DateTime, comment="datetime of the QA processing")
+    status = Column(Integer, comment="QA processing status")
     number_of_flux_standards = Column(Integer, comment="the number of flux standard stars to calculate the vector")
     tbd = Column(REAL, comment="TBD")
 
@@ -1141,12 +1179,16 @@ class flux_calibration_qa(Base):
         processing_id,
         pfs_visit_id,
         drp_qa_version,
+        processed_at,
+        status,
         number_of_flux_standards,
         tbd,
     ):
         self.processing_id = processing_id
         self.pfs_visit_id = pfs_visit_id
         self.drp_qa_version = drp_qa_version
+        self.processed_at = processed_at
+        self.status = status
         self.number_of_flux_standards = number_of_flux_standards
         self.tbd = tbd
 
@@ -1318,7 +1360,7 @@ class drp1d_processing(Base):
     rerun = Column(String, comment="rerun name of the processing")
     description = Column(String, comment="description of the processing")
     drp_version = Column(String, comment="DRP1D version (e.g., 0.40.0)")
-    process_datetime = Column(DateTime, comment="datetime of the processing")
+    processed_at = Column(DateTime, comment="datetime of the processing")
     status = Column(Integer, comment="Processing status")
 
     def __init__(
@@ -1327,14 +1369,14 @@ class drp1d_processing(Base):
         rerun,
         description,
         drp_version,
-        process_datetime,
+        processed_at,
         status,
     ):
         self.processing_id = processing_id
         self.rerun = rerun
         self.description = description
         self.drp_version = drp_version
-        self.process_datetime = process_datetime
+        self.processed_at = processed_at
         self.status = status
 
 
@@ -1354,7 +1396,7 @@ class drp1d_processing_qa(Base):
     pfs_visit_id = Column(Integer)
     qa_version = Column(String, comment="QA code version (e.g., xxxxx)")
     qa_type = Column(String, comment="the type of QA processing")
-    process_datetime = Column(DateTime, comment="datetime of the processing")
+    processed_at = Column(DateTime, comment="datetime of the processing")
 
     def __init__(
         self,
@@ -1363,14 +1405,14 @@ class drp1d_processing_qa(Base):
         pfs_visit_id,
         qa_version,
         qa_type,
-        process_datetime,
+        processed_at,
     ):
         self.qa_id = qa_id
         self.processing_id = processing_id
         self.pfs_visit_id = pfs_visit_id
         self.qa_version = qa_version
         self.qa_type = qa_type
-        self.process_datetime = process_datetime
+        self.processed_at = processed_at
 
 
 class redshift_measurement(Base):
