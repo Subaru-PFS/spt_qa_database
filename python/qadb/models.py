@@ -503,6 +503,35 @@ class exposure_time(Base):
         self.effective_exposure_time_n = effective_exposure_time_n
         self.effective_exposure_time_m = effective_exposure_time_m
 
+
+class onsite_processing_status(Base):
+    '''Status of the DRP on-site processing
+    '''
+    __tablename__ = 'onsite_processing_status'
+
+    pfs_visit_id = Column(Integer,
+                          primary_key=True,
+                          unique=True,
+                          autoincrement=False, 
+                          comment='PFS visit ID')
+    status = Column(Integer,
+                    comment='Status of processing (0=in progress, 1=completed successfully, 2=completed but failed)')
+    started_at = Column(DateTime,
+                        comment='datetime of the processing start')
+    updated_at = Column(DateTime,
+                        comment='datetime of the status update')
+
+    def __init__(self,
+                 pfs_visit_id,
+                 status,
+                 started_at,
+                 updated_at,
+                 ):
+        self.pfs_visit_id = pfs_visit_id
+        self.status = status
+        self.started_at = started_at
+        self.updated_at = updated_at
+
 ## DRP QA tables ##
 
 class data_processing(Base):
