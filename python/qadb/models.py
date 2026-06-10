@@ -176,42 +176,58 @@ class throughput(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    throughput_b_mean = Column(REAL, comment='the total throughput in b-arm (mean)')
-    throughput_b_median = Column(REAL, comment='the total throughput in b-arm (median)')
-    throughput_b_sigma = Column(REAL, comment='the total throughput in b-arm (sigma)')
-    wavelength_ref_b = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
-    throughput_r_mean = Column(REAL, comment='the total throughput in r-arm (mean)')
-    throughput_r_median = Column(REAL, comment='the total throughput in r-arm (median)')
-    throughput_r_sigma = Column(REAL, comment='the total throughput in r-arm (sigma)')
-    wavelength_ref_r = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
-    throughput_n_mean = Column(REAL, comment='the total throughput in n-arm (mean)')
-    throughput_n_median = Column(REAL, comment='the total throughput in n-arm (median)')
-    throughput_n_sigma = Column(REAL, comment='the total throughput in n-arm (sigma)')
-    wavelength_ref_n = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
-    throughput_m_mean = Column(REAL, comment='the total throughput in m-arm (mean)')
-    throughput_m_median = Column(REAL, comment='the total throughput in m-arm (median)')
-    throughput_m_sigma = Column(REAL, comment='the total throughput in m-arm (sigma)')
-    wavelength_ref_m = Column(REAL, comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_b_mean = Column(
+        REAL, comment='the total throughput in b-arm (mean)')
+    throughput_b_median = Column(
+        REAL, comment='the total throughput in b-arm (median)')
+    throughput_b_sigma = Column(
+        REAL, comment='the total throughput in b-arm (sigma)')
+    wavelength_ref_b = Column(
+        REAL, comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_r_mean = Column(
+        REAL, comment='the total throughput in r-arm (mean)')
+    throughput_r_median = Column(
+        REAL, comment='the total throughput in r-arm (median)')
+    throughput_r_sigma = Column(
+        REAL, comment='the total throughput in r-arm (sigma)')
+    wavelength_ref_r = Column(
+        REAL, comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_n_mean = Column(
+        REAL, comment='the total throughput in n-arm (mean)')
+    throughput_n_median = Column(
+        REAL, comment='the total throughput in n-arm (median)')
+    throughput_n_sigma = Column(
+        REAL, comment='the total throughput in n-arm (sigma)')
+    wavelength_ref_n = Column(
+        REAL, comment='the reference wavelength to measure the total throughput (nm)')
+    throughput_m_mean = Column(
+        REAL, comment='the total throughput in m-arm (mean)')
+    throughput_m_median = Column(
+        REAL, comment='the total throughput in m-arm (median)')
+    throughput_m_sigma = Column(
+        REAL, comment='the total throughput in m-arm (sigma)')
+    wavelength_ref_m = Column(
+        REAL, comment='the reference wavelength to measure the total throughput (nm)')
 
     def __init__(self,
-                pfs_visit_id,
-                throughput_b_mean,
-                throughput_b_median,
-                throughput_b_sigma,
-                wavelength_ref_b,
-                throughput_r_mean,
-                throughput_r_median,
-                throughput_r_sigma,
-                wavelength_ref_r,
-                throughput_n_mean,
-                throughput_n_median,
-                throughput_n_sigma,
-                wavelength_ref_n,
-                throughput_m_mean,
-                throughput_m_median,
-                throughput_m_sigma,
-                wavelength_ref_m,
-                ):
+                 pfs_visit_id,
+                 throughput_b_mean,
+                 throughput_b_median,
+                 throughput_b_sigma,
+                 wavelength_ref_b,
+                 throughput_r_mean,
+                 throughput_r_median,
+                 throughput_r_sigma,
+                 wavelength_ref_r,
+                 throughput_n_mean,
+                 throughput_n_median,
+                 throughput_n_sigma,
+                 wavelength_ref_n,
+                 throughput_m_mean,
+                 throughput_m_median,
+                 throughput_m_sigma,
+                 wavelength_ref_m,
+                 ):
         self.pfs_visit_id = pfs_visit_id
         self.throughput_b_mean = throughput_b_mean
         self.throughput_b_median = throughput_b_median
@@ -230,6 +246,7 @@ class throughput(Base):
         self.throughput_m_sigma = throughput_m_sigma
         self.wavelength_ref_m = wavelength_ref_m
 
+
 class noise(Base):
     '''Background noise level for the visit
     '''
@@ -237,22 +254,38 @@ class noise(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    noise_b_mean = Column(REAL, comment='the background noise in b-arm in electron/pix (mean)')
-    noise_b_median = Column(REAL, comment='the background noise in b-arm electron/pix (median)')
-    noise_b_sigma = Column(REAL, comment='the background noise in b-arm electron/pix? (sigma)')
-    wavelength_ref_b = Column(REAL, comment='the reference wavelength to measure the sky background noise in b-arm (nm)')
-    noise_r_mean = Column(REAL, comment='the background noise in r-arm in electron/pix (mean)')
-    noise_r_median = Column(REAL, comment='the background noise in r-arm electron/pix (median)')
-    noise_r_sigma = Column(REAL, comment='the background noise in r-arm electron/pix? (sigma)')
-    wavelength_ref_r = Column(REAL, comment='the reference wavelength to measure the sky background noise in r-arm (nm)')
-    noise_n_mean = Column(REAL, comment='the background noise in n-arm in electron/pix (mean)')
-    noise_n_median = Column(REAL, comment='the background noise in n-arm electron/pix (median)')
-    noise_n_sigma = Column(REAL, comment='the background noise in n-arm electron/pix? (sigma)')
-    wavelength_ref_n = Column(REAL, comment='the reference wavelength to measure the sky background noise in n-arm (nm)')
-    noise_m_mean = Column(REAL, comment='the background noise in m-arm in electron/pix (mean)')
-    noise_m_median = Column(REAL, comment='the background noise in m-arm electron/pix (median)')
-    noise_m_sigma = Column(REAL, comment='the background noise in m-arm electron/pix? (sigma)')
-    wavelength_ref_m = Column(REAL, comment='the reference wavelength to measure the sky background noise in m-arm (nm)')
+    noise_b_mean = Column(
+        REAL, comment='the background noise in b-arm in electron/pix (mean)')
+    noise_b_median = Column(
+        REAL, comment='the background noise in b-arm electron/pix (median)')
+    noise_b_sigma = Column(
+        REAL, comment='the background noise in b-arm electron/pix? (sigma)')
+    wavelength_ref_b = Column(
+        REAL, comment='the reference wavelength to measure the sky background noise in b-arm (nm)')
+    noise_r_mean = Column(
+        REAL, comment='the background noise in r-arm in electron/pix (mean)')
+    noise_r_median = Column(
+        REAL, comment='the background noise in r-arm electron/pix (median)')
+    noise_r_sigma = Column(
+        REAL, comment='the background noise in r-arm electron/pix? (sigma)')
+    wavelength_ref_r = Column(
+        REAL, comment='the reference wavelength to measure the sky background noise in r-arm (nm)')
+    noise_n_mean = Column(
+        REAL, comment='the background noise in n-arm in electron/pix (mean)')
+    noise_n_median = Column(
+        REAL, comment='the background noise in n-arm electron/pix (median)')
+    noise_n_sigma = Column(
+        REAL, comment='the background noise in n-arm electron/pix? (sigma)')
+    wavelength_ref_n = Column(
+        REAL, comment='the reference wavelength to measure the sky background noise in n-arm (nm)')
+    noise_m_mean = Column(
+        REAL, comment='the background noise in m-arm in electron/pix (mean)')
+    noise_m_median = Column(
+        REAL, comment='the background noise in m-arm electron/pix (median)')
+    noise_m_sigma = Column(
+        REAL, comment='the background noise in m-arm electron/pix? (sigma)')
+    wavelength_ref_m = Column(
+        REAL, comment='the reference wavelength to measure the sky background noise in m-arm (nm)')
 
     def __init__(self,
                  pfs_visit_id,
@@ -291,6 +324,7 @@ class noise(Base):
         self.noise_m_sigma = noise_m_sigma
         self.wavelength_ref_m = wavelength_ref_m
 
+
 class moon(Base):
     '''Information on the moon for the visit
     '''
@@ -321,25 +355,44 @@ class sky(Base):
 
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True, unique=True, autoincrement=False)
-    sky_background_b_mean = Column(REAL, comment='the mean sky background level in b-arm averaged over the FoV/fibers (counts)')
-    sky_background_b_median = Column(REAL, comment='the median sky background level in b-arm averaged over the FoV/fibers (counts)')
-    sky_background_b_sigma = Column(REAL, comment='the sigma of the sky background level in b-arm (counts)')
-    wavelength_ref_b = Column(REAL, comment='the reference wavelength to measure the sky background level in b-arm (nm)')
-    sky_background_r_mean = Column(REAL, comment='the mean sky background level in r-arm averaged over the FoV/fibers (counts)')
-    sky_background_r_median = Column(REAL, comment='the median sky background level in r-arm averaged over the FoV/fibers (counts)')
-    sky_background_r_sigma = Column(REAL, comment='the sigma of the sky background level in r-arm (counts)')
-    wavelength_ref_r = Column(REAL, comment='the reference wavelength to measure the sky background level in r-arm (nm)')
-    sky_background_n_mean = Column(REAL, comment='the mean sky background level in n-arm averaged over the FoV/fibers (counts)')
-    sky_background_n_median = Column(REAL, comment='the median sky background level in n-arm averaged over the FoV/fibers (counts)')
-    sky_background_n_sigma = Column(REAL, comment='the sigma of the sky background level in n-arm (counts)')
-    wavelength_ref_n = Column(REAL, comment='the reference wavelength to measure the sky background level in n-arm (nm)')
-    sky_background_m_mean = Column(REAL, comment='the mean sky background level in m-arm averaged over the FoV/fibers (counts)')
-    sky_background_m_median = Column(REAL, comment='the median sky background level in m-arm averaged over the FoV/fibers (counts)')
-    sky_background_m_sigma = Column(REAL, comment='the sigma of the sky background level in m-arm (counts)')
-    wavelength_ref_m = Column(REAL, comment='the reference wavelength to measure the sky background level in m-arm (nm)')
-    agc_background_mean = Column(REAL, comment='the mean agc image background level averaged over the FoV/fibers (counts)')
-    agc_background_median = Column(REAL, comment='the median agc image background level averaged over the FoV/fibers (counts)')
-    agc_background_sigma = Column(REAL, comment='the sigma of the agc image background level (counts)')
+    sky_background_b_mean = Column(
+        REAL, comment='the mean sky background level in b-arm averaged over the FoV/fibers (counts)')
+    sky_background_b_median = Column(
+        REAL, comment='the median sky background level in b-arm averaged over the FoV/fibers (counts)')
+    sky_background_b_sigma = Column(
+        REAL, comment='the sigma of the sky background level in b-arm (counts)')
+    wavelength_ref_b = Column(
+        REAL, comment='the reference wavelength to measure the sky background level in b-arm (nm)')
+    sky_background_r_mean = Column(
+        REAL, comment='the mean sky background level in r-arm averaged over the FoV/fibers (counts)')
+    sky_background_r_median = Column(
+        REAL, comment='the median sky background level in r-arm averaged over the FoV/fibers (counts)')
+    sky_background_r_sigma = Column(
+        REAL, comment='the sigma of the sky background level in r-arm (counts)')
+    wavelength_ref_r = Column(
+        REAL, comment='the reference wavelength to measure the sky background level in r-arm (nm)')
+    sky_background_n_mean = Column(
+        REAL, comment='the mean sky background level in n-arm averaged over the FoV/fibers (counts)')
+    sky_background_n_median = Column(
+        REAL, comment='the median sky background level in n-arm averaged over the FoV/fibers (counts)')
+    sky_background_n_sigma = Column(
+        REAL, comment='the sigma of the sky background level in n-arm (counts)')
+    wavelength_ref_n = Column(
+        REAL, comment='the reference wavelength to measure the sky background level in n-arm (nm)')
+    sky_background_m_mean = Column(
+        REAL, comment='the mean sky background level in m-arm averaged over the FoV/fibers (counts)')
+    sky_background_m_median = Column(
+        REAL, comment='the median sky background level in m-arm averaged over the FoV/fibers (counts)')
+    sky_background_m_sigma = Column(
+        REAL, comment='the sigma of the sky background level in m-arm (counts)')
+    wavelength_ref_m = Column(
+        REAL, comment='the reference wavelength to measure the sky background level in m-arm (nm)')
+    agc_background_mean = Column(
+        REAL, comment='the mean agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_median = Column(
+        REAL, comment='the median agc image background level averaged over the FoV/fibers (counts)')
+    agc_background_sigma = Column(
+        REAL, comment='the sigma of the agc image background level (counts)')
 
     def __init__(self,
                  pfs_visit_id,
@@ -384,6 +437,7 @@ class sky(Base):
         self.agc_background_median = agc_background_median
         self.agc_background_sigma = agc_background_sigma
 
+
 class telescope(Base):
     '''Information on the telescope status
     '''
@@ -396,7 +450,7 @@ class telescope(Base):
     altitude = Column(
         REAL, comment='the average telescope altitude during the exposure (deg.)')
     airmass = Column(
-        REAL, comment='the average airmass during the exposure (deg.)')
+        REAL, comment='the average airmass during the exposure')
 
     def __init__(self,
                  pfs_visit_id,
@@ -512,7 +566,7 @@ class onsite_processing_status(Base):
     pfs_visit_id = Column(Integer,
                           primary_key=True,
                           unique=True,
-                          autoincrement=False, 
+                          autoincrement=False,
                           comment='PFS visit ID')
     status = Column(Integer,
                     comment='Status of processing (0=in progress, 1=completed successfully, 2=completed but failed)')
@@ -534,62 +588,35 @@ class onsite_processing_status(Base):
 
 ## DRP QA tables ##
 
-class data_processing(Base):
+
+class data_processing_pipe2d(Base):
     '''Information of the pipeline processing
     '''
-    __tablename__ = 'data_processing'
+    __tablename__ = 'data_processing_pipe2d'
 
-    run_id = Column(Integer,
-                    primary_key=True,
-                    unique=True,
-                    autoincrement=True)
-    pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'))
-    drp_id = Column(Integer,
-                    comment='DRPxD to process the data (x=1/2)')
-    drp_version = Column(String,
-                         comment='DRP version (e.g., w.2023.20 (DRP2D), 0.40.0 (DRP1D) )')
-    process_type = Column(String,
-                          comment='the type of DRP processing (e.g., reduceExposure, mergeArms, etc.)')
-    process_datetime_start = Column(DateTime,
-                                    comment='datetime of the processing run start')
-    process_datetime_end = Column(DateTime,
-                                  comment='datetime of the processing run end')
+    processing_id = Column(Integer,
+                           primary_key=True,
+                           autoincrement=True,
+                           )
+    collection_name = Column(String,
+                             comment='pipe2d collection name')
+    run_name = Column(String,
+                      comment='pipe2d RUN collection name')
+    pipe2d_version = Column(String,
+                            comment='pipe2d version (e.g., w.2025.20)')
+    drp_qa_version = Column(String,
+                            comment='drp_qa version (e.g., w.2025.20)')
 
     def __init__(self,
-                 pfs_visit_id,
-                 drp_id,
-                 drp_version,
-                 process_type,
-                 process_datetime_start,
-                 process_datetime_end,
+                 collection_name,
+                 run_name,
+                 pipe2d_version,
+                 drp_qa_version,
                  ):
-        self.pfs_visit_id = pfs_visit_id
-        self.drp_id = drp_id
-        self.drp_version = drp_version
-        self.process_type = process_type
-        self.process_datetime_start = process_datetime_start
-        self.process_datetime_end = process_datetime_end
-
-
-class data_processing_results(Base):
-    '''Information on the data processing results
-    '''
-    __tablename__ = 'data_processing_results'
-
-    run_id = Column(Integer, ForeignKey('data_processing.run_id'),
-                    primary_key=True,
-                    unique=False,
-                    autoincrement=False
-                    )
-    tbd = Column(REAL,
-                 comment='TBD')
-
-    def __init__(self,
-                 run_id,
-                 tbd,
-                 ):
-        self.run_id = run_id
-        self.tbd = tbd
+        self.collection_name = collection_name
+        self.run_name = run_name
+        self.pipe2d_version = pipe2d_version
+        self.drp_qa_version = drp_qa_version
 
 
 class data_qa(Base):
@@ -602,10 +629,12 @@ class data_qa(Base):
                     unique=True,
                     autoincrement=True)
     pfs_visit_id = Column(Integer, ForeignKey('pfs_visit.pfs_visit_id'))
-    qa_version = Column(String,
-                        comment='QA code version (e.g., xxxxx)')
-    qa_type = Column(String,
-                     comment='the type of QA processing (e.g., detectorMap, fluxCalibrate, etc.)')
+    pipe2d_version = Column(String,
+                            comment='pipe2d version (e.g., w.2025.20)')
+    drp_qa_version = Column(String,
+                            comment='drp_qa version (e.g., w.2025.20)')
+    process_type = Column(String,
+                          comment='process_type')
     process_datetime_start = Column(DateTime,
                                     comment='datetime of the processing run start')
     process_datetime_end = Column(DateTime,
@@ -613,156 +642,452 @@ class data_qa(Base):
 
     def __init__(self,
                  pfs_visit_id,
-                 drp_id,
-                 drp_version,
+                 pipe2d_version,
+                 drp_qa_version,
                  process_type,
                  process_datetime_start,
                  process_datetime_end,
                  ):
         self.pfs_visit_id = pfs_visit_id
-        self.drp_id = drp_id
-        self.drp_version = drp_version
+        self.pipe2d_version = pipe2d_version
+        self.drp_qa_version = drp_qa_version
         self.process_type = process_type
         self.process_datetime_start = process_datetime_start
         self.process_datetime_end = process_datetime_end
 
 
-class detector_map(Base):
+class detector_map_qa(Base):
     '''Quality of the detectorMap for the visit
     '''
-    __tablename__ = 'detector_map'
-    __table_args__ = (UniqueConstraint('run_id', 'spectrograph', 'arm'), {})
+    __tablename__ = 'detector_map_qa'
+    __table_args__ = (UniqueConstraint(
+        'processing_id', 'pfs_visit_id', 'camera_name', 'status_type', 'description'), {})
 
-    run_id = Column(Integer, ForeignKey('data_qa.run_id'),
-                    primary_key=True,
-                    unique=False,
-                    autoincrement=False
-                    )
-    spectrograph = Column(Integer,
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id'),
+                           primary_key=True,
+                           autoincrement=False
+                           )
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True,
-                          unique=False,
                           autoincrement=False
                           )
+    camera_name = Column(String(2),
+                         primary_key=True,
+                         autoincrement=False
+                         )
+    status_type = Column(String,
+                         primary_key=True,
+                         autoincrement=False
+                         )
+    description = Column(String,
+                         primary_key=True,
+                         autoincrement=False
+                         )
+    spectrograph = Column(Integer,
+                          comment='')
     arm = Column(String(1),
-                 primary_key=True,
-                 unique=False,
-                 autoincrement=False
-                 )
-    residual_wavelength_mean = Column(REAL,
-                                      comment='the mean wavelength residual averaged over fibers (nm)')
-    residual_wavelength_median = Column(REAL,
-                                        comment='the median wavelength residual averaged over fibers (nm)')
-    residual_wavelength_sigma = Column(REAL,
-                                       comment='the sigma of the wavelength residual averaged over fibers (nm)')
-    residual_trace_mean = Column(REAL,
-                                 comment='the mean wavelength residual averaged over fibers (nm)')
-    residual_trace_median = Column(REAL,
-                                   comment='the median wavelength residual averaged over fibers (nm)')
-    residual_trace_sigma = Column(REAL,
-                                  comment='the sigma of the wavelength residual averaged over fibers (nm)')
+                 comment='')
+    observation_reason = Column(String,
+                                comment='')
+    dof = Column(REAL,
+                 comment='')
+    chi2x = Column(REAL,
+                   comment='')
+    chi2y = Column(REAL,
+                   comment='')
+    spatial_median = Column(REAL,
+                            comment='')
+    spatial_robust_rms = Column(REAL,
+                                comment='')
+    spatial_weighted_rms = Column(REAL,
+                                  comment='')
+    spatial_soften_fit = Column(REAL,
+                                comment='')
+    spatial_dof = Column(REAL,
+                         comment='')
+    spatial_num_fibers = Column(Integer,
+                                comment='')
+    spatial_num_lines = Column(Integer,
+                               comment='')
+    wavelength_median = Column(REAL,
+                               comment='')
+    wavelength_robust_rms = Column(REAL,
+                                   comment='')
+    wavelength_weighted_rms = Column(REAL,
+                                     comment='')
+    wavelength_soften_fit = Column(REAL,
+                                   comment='')
+    wavelength_dof = Column(REAL,
+                            comment='')
+    wavelength_num_fibers = Column(Integer,
+                                   comment='')
+    wavelength_num_lines = Column(Integer,
+                                  comment='')
 
     def __init__(self,
-                 run_id,
+                 processing_id,
+                 pfs_visit_id,
+                 camera_name,
+                 status_type,
+                 description,
+                 spectrograph,
                  arm,
-                 residual_wavelength_mean,
-                 residual_wavelength_median,
-                 residual_wavelength_sigma,
-                 residual_trace_mean,
-                 residual_trace_median,
-                 residual_trace_sigma,
+                 observation_reason,
+                 dof,
+                 chi2x,
+                 chi2y,
+                 spatial_median,
+                 spatial_robust_rms,
+                 spatial_weighted_rms,
+                 spatial_soften_fit,
+                 spatial_dof,
+                 spatial_num_fibers,
+                 spatial_num_lines,
+                 wavelength_median,
+                 wavelength_robust_rms,
+                 wavelength_weighted_rms,
+                 wavelength_soften_fit,
+                 wavelength_dof,
+                 wavelength_num_fibers,
+                 wavelength_num_lines,
                  ):
-        self.run_id = run_id
+        self.processing_id = processing_id
+        self.pfs_visit_id = pfs_visit_id
+        self.camera_name = camera_name
+        self.status_type = status_type
+        self.description = description
+        self.spectrograph = spectrograph
         self.arm = arm
-        self.residual_wavelength_mean = residual_wavelength_mean
-        self.residual_wavelength_median = residual_wavelength_median
-        self.residual_wavelength_sigma = residual_wavelength_sigma
-        self.residual_trace_mean = residual_trace_mean
-        self.residual_trace_median = residual_trace_median
-        self.residual_trace_sigma = residual_trace_sigma
+        self.observation_reason = observation_reason
+        self.dof = dof
+        self.chi2x = chi2x
+        self.chi2y = chi2y
+        self.spatial_median = spatial_median
+        self.spatial_robust_rms = spatial_robust_rms
+        self.spatial_weighted_rms = spatial_weighted_rms
+        self.spatial_soften_fit = spatial_soften_fit
+        self.spatial_dof = spatial_dof
+        self.spatial_num_fibers = spatial_num_fibers
+        self.spatial_num_lines = spatial_num_lines
+        self.wavelength_median = wavelength_median
+        self.wavelength_robust_rms = wavelength_robust_rms
+        self.wavelength_weighted_rms = wavelength_weighted_rms
+        self.wavelength_soften_fit = wavelength_soften_fit
+        self.wavelength_dof = wavelength_dof
+        self.wavelength_num_fibers = wavelength_num_fibers
+        self.wavelength_num_lines = wavelength_num_lines
 
 
-class sky_subtraction(Base):
-    '''Quality of the sky subtraction for the visit
+class extraction_qa(Base):
+    '''Quality of the extraction for the visit
     '''
-    __tablename__ = 'sky_subtraction'
-    __table_args__ = (UniqueConstraint('run_id', 'spectrograph', 'arm'), {})
+    __tablename__ = 'extraction_qa'
+    __table_args__ = (UniqueConstraint(
+        'processing_id', 'pfs_visit_id', 'camera_name', 'fiber_id'), {})
 
-    run_id = Column(Integer, ForeignKey('data_qa.run_id'),
-                    primary_key=True,
-                    unique=False,
-                    autoincrement=False
-                    )
-    spectrograph = Column(Integer,
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id'),
+                           primary_key=True,
+                           autoincrement=False
+                           )
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True,
-                          unique=False,
                           autoincrement=False
                           )
+    camera_name = Column(String(2),
+                         primary_key=True,
+                         autoincrement=False
+                         )
+    fiber_id = Column(Integer,
+                      primary_key=True,
+                      autoincrement=False
+                      )
+    spectrograph = Column(Integer,
+                          comment='')
     arm = Column(String(1),
-                 primary_key=True,
-                 unique=False,
-                 autoincrement=False
-                 )
+                 comment='')
+    xa = Column(REAL,
+                comment='')
+    pfs_arm_ave = Column(REAL,
+                         comment='')
+    chi2 = Column(REAL,
+                  comment='')
+    chi_ave = Column(REAL,
+                     comment='')
+    chi_med = Column(REAL,
+                     comment='')
+    chi_std = Column(REAL,
+                     comment='')
+    chi_at_peak = Column(REAL,
+                         comment='')
+
+    def __init__(self,
+                 processing_id,
+                 pfs_visit_id,
+                 camera_name,
+                 fiber_id,
+                 spectrograph,
+                 arm,
+                 xa,
+                 pfs_arm_ave,
+                 chi2,
+                 chi_ave,
+                 chi_med,
+                 chi_std,
+                 chi_at_peak,
+                 ):
+        self.processing_id = processing_id
+        self.pfs_visit_id = pfs_visit_id
+        self.camera_name = camera_name
+        self.fiber_id = fiber_id
+        self.spectrograph = spectrograph
+        self.arm = arm
+        self.xa = xa
+        self.pfs_arm_ave = pfs_arm_ave
+        self.chi2 = chi2
+        self.chi_ave = chi_ave
+        self.chi_med = chi_med
+        self.chi_std = chi_std
+        self.chi_at_peak = chi_at_peak
+
+
+class sky_subtraction_qa_sa(Base):
+    '''Quality of the sky subtraction for each visit (QA by S.A.)
+    '''
+    __tablename__ = 'sky_subtraction_qa_sa'
+    __table_args__ = (UniqueConstraint('processing_id', 'pfs_visit_id'),
+                      {})
+
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id'),
+                           primary_key=True,
+                           autoincrement=False
+                           )
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False
+                          )
     number_of_sky_fibers = Column(Integer,
                                   comment='the number of sky fibers to make the sky model')
-    residual_chi_mean = Column(REAL,
-                               comment='the mean sky subtraction residual in chi averaged over FoV (counts)')
-    residual_chi_median = Column(REAL,
-                                 comment='the median sky subtraction residual in chi averaged over FoV (counts)')
-    residual_chi_sigma = Column(REAL,
-                                comment='the sigma of the sky subtraction residual in chi (counts)')
+    skysub_median_avg = Column(REAL,
+                               comment='TBW')
+    skysub_median_under = Column(REAL,
+                                 comment='TBW')
+    skysub_median_over = Column(REAL,
+                                comment='TBW')
+    skysub_median_abs = Column(REAL,
+                               comment='TBW')
+    skysub_continuum_flux_fit_median = Column(REAL,
+                                              comment='the median of residual of sky-subtracted sky spectra (electrons/nm)')
+    skysub_continuum_sky_fit_median = Column(REAL,
+                                             comment='the median of sky spectra (electrons/nm)')
 
     def __init__(self,
-                 run_id,
-                 arm,
+                 processing_id,
+                 pfs_visit_id,
                  number_of_sky_fibers,
-                 residual_chi_mean,
-                 residual_chi_median,
-                 residual_chi_sigma,
+                 skysub_median_avg,
+                 skysub_median_under,
+                 skysub_median_over,
+                 skysub_median_abs,
+                 skysub_continuum_flux_fit_median,
+                 skysub_continuum_sky_fit_median,
                  ):
-        self.run_id = run_id
-        self.arm = arm
+        self.processing_id = processing_id
+        self.pfs_visit_id = pfs_visit_id
         self.number_of_sky_fibers = number_of_sky_fibers
-        self.residual_chi_mean = residual_chi_mean
-        self.residual_chi_median = residual_chi_median
-        self.residual_chi_sigma = residual_chi_sigma
+        self.skysub_median_avg = skysub_median_avg
+        self.skysub_median_under = skysub_median_under
+        self.skysub_median_over = skysub_median_over
+        self.skysub_median_abs = skysub_median_abs
+        self.skysub_continuum_flux_fit_median = skysub_continuum_flux_fit_median
+        self.skysub_continuum_sky_fit_median = skysub_continuum_sky_fit_median
 
 
-class flux_calibration(Base):
-    '''Quality of the flux calibration for the visit
+class sky_subtraction_qa_sa_continuum(Base):
+    '''Quality of the sky subtraction (continuum) for each visit and fiberId (QA by S.A.)
     '''
-    __tablename__ = 'flux_calibration'
-    __table_args__ = (UniqueConstraint('run_id', 'spectrograph', 'arm'), {})
+    __tablename__ = 'sky_subtraction_qa_sa_continuum'
+    __table_args__ = (UniqueConstraint('processing_id', 'pfs_visit_id', 'fiber_id'),
+                      ForeignKeyConstraint(['processing_id', 'pfs_visit_id'], [
+                                           'sky_subtraction_qa_sa.processing_id', 'sky_subtraction_qa_sa.pfs_visit_id']),
+                      {})
 
-    run_id = Column(Integer, ForeignKey('data_qa.run_id'),
-                    primary_key=True,
-                    unique=False,
-                    autoincrement=False
-                    )
-    spectrograph = Column(Integer,
+    processing_id = Column(Integer,
+                           primary_key=True,
+                           autoincrement=False
+                           )
+    pfs_visit_id = Column(Integer,
                           primary_key=True,
-                          unique=False,
                           autoincrement=False
                           )
-    arm = Column(String(1),
-                 primary_key=True,
-                 unique=False,
-                 autoincrement=False
-                 )
-    number_of_flux_standards = Column(Integer,
-                                      comment='the number of flux standard stars to calculate the vector')
-    tbd = Column(REAL,
-                 comment='TBD')
+    fiber_id = Column(Integer,
+                      primary_key=True,
+                      autoincrement=False
+                      )
+    continuum_residual_fit = Column(REAL,
+                                    comment='the median of residual of sky-subtracted sky spectra (electrons/nm)')
+    continuum_sky_fit = Column(REAL,
+                               comment='the median of sky spectra (electrons/nm)')
 
     def __init__(self,
-                 run_id,
-                 arm,
-                 number_of_flux_standards,
-                 tbd,
+                 processing_id,
+                 pfs_visit_id,
+                 fiber_id,
+                 continuum_residual_fit,
+                 continuum_sky_fit,
                  ):
-        self.run_id = run_id
-        self.arm = arm
+        self.processing_id = processing_id
+        self.pfs_visit_id = pfs_visit_id
+        self.fiber_id = fiber_id
+        self.continuum_residual_fit = continuum_residual_fit
+        self.continuum_sky_fit = continuum_sky_fit
+
+
+class sky_subtraction_qa_sa_line(Base):
+    '''Quality of the sky subtraction (lines) for each visit and fiberId (QA by S.A.)
+    '''
+    __tablename__ = 'sky_subtraction_qa_sa_line'
+    __table_args__ = (UniqueConstraint('processing_id', 'pfs_visit_id', 'fiber_id', 'subtype'),
+                      ForeignKeyConstraint(['processing_id', 'pfs_visit_id'], [
+                                           'sky_subtraction_qa_sa.processing_id', 'sky_subtraction_qa_sa.pfs_visit_id']),
+                      {})
+
+    processing_id = Column(Integer,
+                           primary_key=True,
+                           autoincrement=False
+                           )
+    pfs_visit_id = Column(Integer,
+                          primary_key=True,
+                          autoincrement=False
+                          )
+    fiber_id = Column(Integer,
+                      primary_key=True,
+                      autoincrement=False
+                      )
+    subtype = Column(String,
+                     primary_key=True,
+                     autoincrement=False,
+                     comment='subtype of evaluation (avg/under/over/abs)')
+    flux_to_sky = Column(REAL,
+                         comment='the ratio between residual and sky flux (percent)')
+    sky_lines_num = Column(Integer,
+                           comment='the number of sky lines used')
+
+    def __init__(self,
+                 processing_id,
+                 pfs_visit_id,
+                 fiber_id,
+                 subtype,
+                 flux_to_sky,
+                 sky_lines_num,
+                 ):
+        self.processing_id = processing_id
+        self.pfs_visit_id = pfs_visit_id
+        self.fiber_id = fiber_id
+        self.subtype = subtype
+        self.flux_to_sky = flux_to_sky
+        self.sky_lines_num = sky_lines_num
+
+
+class flux_cal_qa(Base):
+    '''Quality of the flux calibration for the visit
+    '''
+    __tablename__ = 'flux_cal_qa'
+    __table_args__ = (UniqueConstraint('processing_id', 'pfs_visit_id'), {})
+
+    processing_id = Column(Integer, ForeignKey('data_processing_pipe2d.processing_id'),
+                           primary_key=True,
+                           autoincrement=False
+                           )
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False
+                          )
+    number_of_flux_standards = Column(Integer,
+                                      comment='the number of flux standard stars to calculate the vector')
+    merged_filter = Column(REAL,
+                           comment='TBD')
+    merged_median = Column(REAL,
+                           comment='TBD')
+    merged_sigma = Column(REAL,
+                          comment='TBD')
+    merged_sn_median = Column(REAL,
+                              comment='TBD')
+    merged_sn_sigma = Column(REAL,
+                             comment='TBD')
+    imag_median = Column(REAL,
+                         comment='TBD')
+    imag_sigma = Column(REAL,
+                        comment='TBD')
+    merged_color_filters = Column(REAL,
+                                  comment='TBD')
+    merged_color_median = Column(REAL,
+                                 comment='TBD')
+    merged_color_sigma = Column(REAL,
+                                comment='TBD')
+    single_median = Column(REAL,
+                           comment='TBD')
+    single_sigma = Column(REAL,
+                          comment='TBD')
+    single_color_median = Column(REAL,
+                                 comment='TBD')
+    single_color_sigma = Column(REAL,
+                                comment='TBD')
+    stellar_sequence_sigma_gri = Column(REAL,
+                                        comment='TBD')
+    stellar_sequence_sigma_riz = Column(REAL,
+                                        comment='TBD')
+    stellar_sequence_sigma_izy = Column(REAL,
+                                        comment='TBD')
+
+    def __init__(self,
+                 processing_id,
+                 pfs_visit_id,
+                 number_of_flux_standards,
+                 merged_filter,
+                 merged_median,
+                 merged_sigma,
+                 merged_sn_median,
+                 merged_sn_sigma,
+                 imag_median,
+                 imag_sigma,
+                 merged_color_filters,
+                 merged_color_median,
+                 merged_color_sigma,
+                 single_median,
+                 single_sigma,
+                 single_color_median,
+                 single_color_sigma,
+                 stellar_sequence_sigma_gri,
+                 stellar_sequence_sigma_riz,
+                 stellar_sequence_sigma_izy,
+                 ):
+        self.processing_id = processing_id
+        self.pfs_visit_id = pfs_visit_id
         self.number_of_flux_standards = number_of_flux_standards
-        self.tbd = tbd
+        self.merged_filter = merged_filter
+        self.merged_median = merged_median
+        self.merged_sigma = merged_sigma
+        self.merged_sn_median = merged_sn_median
+        self.merged_sn_sigma = merged_sn_sigma
+        self.imag_median = imag_median
+        self.imag_sigma = imag_sigma
+        self.merged_color_filters = merged_color_filters
+        self.merged_color_median = merged_color_median
+        self.merged_color_sigma = merged_color_sigma
+        self.single_median = single_median
+        self.single_sigma = single_sigma
+        self.single_color_median = single_color_median
+        self.single_color_sigma = single_color_sigma
+        self.stellar_sequence_sigma_gri = stellar_sequence_sigma_gri
+        self.stellar_sequence_sigma_riz = stellar_sequence_sigma_riz
+        self.stellar_sequence_sigma_izy = stellar_sequence_sigma_izy
 
 
 class cosmic_rays(Base):
