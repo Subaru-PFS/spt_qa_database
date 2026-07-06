@@ -1002,7 +1002,7 @@ class flux_cal_qa(Base):
                           )
     number_of_flux_standards = Column(Integer,
                                       comment='the number of flux standard stars to calculate the vector')
-    merged_filter = Column(REAL,
+    merged_filter = Column(String,
                            comment='TBD')
     merged_median = Column(REAL,
                            comment='TBD')
@@ -1016,7 +1016,7 @@ class flux_cal_qa(Base):
                          comment='TBD')
     imag_sigma = Column(REAL,
                         comment='TBD')
-    merged_color_filters = Column(REAL,
+    merged_color_filters = Column(String,
                                   comment='TBD')
     merged_color_median = Column(REAL,
                                  comment='TBD')
