@@ -607,6 +607,11 @@ class data_processing_pipe2d(Base):
     drp_qa_version = Column(String,
                             comment='drp_qa version (e.g., w.2026.20)')
 
+    __table_args__ = (
+        UniqueConstraint('collection_name', 'run_name',
+                         name='uq_collection_run'),
+    )
+
     def __init__(self,
                  collection_name,
                  run_name,
