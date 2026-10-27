@@ -1094,7 +1094,7 @@ class dm_line_residual_qa(Base):
                                 comment='NOMINAL, APPLY_SHIFT, RECALIBRATE, INSUFFICIENT_DATA or UNJUDGED')
     calib_id = Column(String, comment='Butler dataset id of the detectorMap_calib')
     calib_run = Column(String, comment='Butler RUN of the detectorMap_calib')
-    calib_created = Column(String, comment='CALIB_CREATION_DATE of the detectorMap_calib')
+    calib_created = Column(DateTime, comment='CALIB_CREATION_DATE of the detectorMap_calib (the header says the date alone)')
     calib_first_visit = Column(Integer)
     calib_last_visit = Column(Integer)
 
@@ -1134,7 +1134,7 @@ class qa_thresholds(Base):
     sha256 = Column(String(64), unique=True, nullable=False,
                     comment='of the file: the same thresholds registered twice are one row')
     name = Column(String, comment='file name, e.g. iqQaThresholds-run25.yaml')
-    derived_on = Column(String, comment='YYYY-MM-DD')
+    derived_on = Column(DateTime, comment='the day the thresholds were derived (the file says the date alone)')
     collection = Column(String, comment='the collection the thresholds were derived from')
     reference_runs = Column(String, comment='comma-separated, e.g. 25,29')
     drp_qa_version = Column(String)
