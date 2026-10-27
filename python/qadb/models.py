@@ -1166,7 +1166,8 @@ class qa_threshold_entry(Base):
     camera_set = Column(String)
     reference = Column(String)
     status_type = Column(String)
-    illumination = Column(String)
+    illumination = Column(String,
+                          comment='null means the default, full: an entry that names no illumination judges PFI frames alone (drp_qa gate.DEFAULT_POPULATION)')
     higher_is_worse = Column(Boolean)
     absolute = Column(Boolean)
     method = Column(String, comment='percentile or tolerance')
