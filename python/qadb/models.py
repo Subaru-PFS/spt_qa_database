@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey, DateTime, Boolean, REAL
+from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey, DateTime, Boolean, REAL, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy import UniqueConstraint, ForeignKeyConstraint
@@ -606,6 +606,10 @@ class data_processing_pipe2d(Base):
                             comment='pipe2d version (e.g., w.2026.20)')
     drp_qa_version = Column(String,
                             comment='drp_qa version (e.g., w.2026.20)')
+    datamodel_version = Column(String,
+                               comment='datamodel version of the reduction (e.g., w.2026.40)')
+    obs_pfs_version = Column(String,
+                             comment='obs_pfs version of the reduction (e.g., w.2026.40)')
 
     __table_args__ = (
         UniqueConstraint('collection_name', 'run_name',
@@ -617,11 +621,15 @@ class data_processing_pipe2d(Base):
                  run_name,
                  pipe2d_version,
                  drp_qa_version,
+                 datamodel_version=None,
+                 obs_pfs_version=None,
                  ):
         self.collection_name = collection_name
         self.run_name = run_name
         self.pipe2d_version = pipe2d_version
         self.drp_qa_version = drp_qa_version
+        self.datamodel_version = datamodel_version
+        self.obs_pfs_version = obs_pfs_version
 
 
 class data_qa(Base):
@@ -659,128 +667,6 @@ class data_qa(Base):
         self.process_type = process_type
         self.process_datetime_start = process_datetime_start
         self.process_datetime_end = process_datetime_end
-
-
-class detector_map_qa(Base):
-    '''Quality of the detectorMap for the visit
-    '''
-    __tablename__ = 'detector_map_qa'
-
-    processing_id = Column(Integer,
-                           ForeignKey('data_processing_pipe2d.processing_id'),
-                           primary_key=True,
-                           autoincrement=False
-                           )
-    pfs_visit_id = Column(Integer,
-                          ForeignKey('pfs_visit.pfs_visit_id'),
-                          primary_key=True,
-                          autoincrement=False
-                          )
-    camera_name = Column(String(2),
-                         primary_key=True,
-                         autoincrement=False
-                         )
-    status_type = Column(String,
-                         primary_key=True,
-                         autoincrement=False
-                         )
-    description = Column(String,
-                         primary_key=True,
-                         autoincrement=False
-                         )
-    spectrograph = Column(Integer,
-                          comment='')
-    arm = Column(String(1),
-                 comment='')
-    observation_reason = Column(String,
-                                comment='')
-    dof = Column(REAL,
-                 comment='')
-    chi2x = Column(REAL,
-                   comment='')
-    chi2y = Column(REAL,
-                   comment='')
-    spatial_median = Column(REAL,
-                            comment='')
-    spatial_robust_rms = Column(REAL,
-                                comment='')
-    spatial_weighted_rms = Column(REAL,
-                                  comment='')
-    spatial_soften_fit = Column(REAL,
-                                comment='')
-    spatial_dof = Column(REAL,
-                         comment='')
-    spatial_num_fibers = Column(Integer,
-                                comment='')
-    spatial_num_lines = Column(Integer,
-                               comment='')
-    wavelength_median = Column(REAL,
-                               comment='')
-    wavelength_robust_rms = Column(REAL,
-                                   comment='')
-    wavelength_weighted_rms = Column(REAL,
-                                     comment='')
-    wavelength_soften_fit = Column(REAL,
-                                   comment='')
-    wavelength_dof = Column(REAL,
-                            comment='')
-    wavelength_num_fibers = Column(Integer,
-                                   comment='')
-    wavelength_num_lines = Column(Integer,
-                                  comment='')
-
-    def __init__(self,
-                 processing_id,
-                 pfs_visit_id,
-                 camera_name,
-                 status_type,
-                 description,
-                 spectrograph,
-                 arm,
-                 observation_reason,
-                 dof,
-                 chi2x,
-                 chi2y,
-                 spatial_median,
-                 spatial_robust_rms,
-                 spatial_weighted_rms,
-                 spatial_soften_fit,
-                 spatial_dof,
-                 spatial_num_fibers,
-                 spatial_num_lines,
-                 wavelength_median,
-                 wavelength_robust_rms,
-                 wavelength_weighted_rms,
-                 wavelength_soften_fit,
-                 wavelength_dof,
-                 wavelength_num_fibers,
-                 wavelength_num_lines,
-                 ):
-        self.processing_id = processing_id
-        self.pfs_visit_id = pfs_visit_id
-        self.camera_name = camera_name
-        self.status_type = status_type
-        self.description = description
-        self.spectrograph = spectrograph
-        self.arm = arm
-        self.observation_reason = observation_reason
-        self.dof = dof
-        self.chi2x = chi2x
-        self.chi2y = chi2y
-        self.spatial_median = spatial_median
-        self.spatial_robust_rms = spatial_robust_rms
-        self.spatial_weighted_rms = spatial_weighted_rms
-        self.spatial_soften_fit = spatial_soften_fit
-        self.spatial_dof = spatial_dof
-        self.spatial_num_fibers = spatial_num_fibers
-        self.spatial_num_lines = spatial_num_lines
-        self.wavelength_median = wavelength_median
-        self.wavelength_robust_rms = wavelength_robust_rms
-        self.wavelength_weighted_rms = wavelength_weighted_rms
-        self.wavelength_soften_fit = wavelength_soften_fit
-        self.wavelength_dof = wavelength_dof
-        self.wavelength_num_fibers = wavelength_num_fibers
-        self.wavelength_num_lines = wavelength_num_lines
 
 
 class extraction_qa(Base):
@@ -1084,6 +970,244 @@ class flux_cal_qa(Base):
         self.stellar_sequence_sigma_gri = stellar_sequence_sigma_gri
         self.stellar_sequence_sigma_riz = stellar_sequence_sigma_riz
         self.stellar_sequence_sigma_izy = stellar_sequence_sigma_izy
+
+
+## Per-image gate (PIPE2D-1385) ##
+#
+# drp_qa's imageQualityQa and dmLineResiduals tasks write one table per detector
+# image to the Butler; pfs.drp.qa.qadb loads them here, keyed by the processing
+# (collection and Butler RUN), the visit and the camera (e.g. 'b1'). Loading is
+# idempotent: the same image loaded again replaces its rows.
+
+
+class image_quality_qa(Base):
+    '''imageQualityQa metrics and verdict per detector image (the Butler's iqQaMetrics)
+    '''
+    __tablename__ = 'image_quality_qa'
+
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False,
+                          index=True)
+    camera_name = Column(String(2),
+                         primary_key=True,
+                         autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
+    spectrograph = Column(Integer)
+    arm = Column(String(1))
+    obs_type = Column(String,
+                      comment='frame type from W_SEQTYP: arc, trace, object, twilight, dark, ...')
+    seq_name = Column(String,
+                      comment='W_SEQNAM')
+    illumination = Column(String,
+                          comment='full (PFI fibers) or iis (the engineering fibers lit by the IIS)')
+    trace_only = Column(Boolean,
+                        comment='FWHM read from the fiberProfiles calibration, not measured')
+    med_fwhm = Column(REAL, comment='median FWHM [pix]')
+    med_dx_center = Column(REAL, comment='median spatial offset from detectorMap_calib [pix]')
+    dx_center_rms = Column(REAL, comment='RMS of the spatial offset [pix]')
+    pct_flagged = Column(REAL, comment='per cent of lines flagged')
+    pct_low_sn = Column(REAL, comment='per cent of lines flagged for low S/N')
+    pct_meas_fail = Column(REAL, comment='per cent of lines whose measurement failed')
+    n_lines = Column(Integer, comment='rows of lines')
+    lines_per_fiber = Column(REAL, comment='unflagged lamp lines (trace centroids on a quartz) per lit fiber')
+    n_lit_fibers = Column(Integer, comment='fibers of the detector the pfsConfig lights')
+    n_fibers = Column(Integer, comment='fibers of the detector lit or behind a black dot')
+    n_trace_rows = Column(Integer, comment='trace centroids in lines')
+    qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
+    qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
+    qa_reason = Column(String)
+    calexp_run = Column(String, comment='Butler RUN of the calexp judged')
+    isr_bad_pixels = Column(Integer)
+    isr_time = Column(REAL, comment='[s]')
+    cosmic_ray_count = Column(Integer)
+    cosmic_ray_pixels = Column(Integer)
+    cosmic_ray_time = Column(REAL, comment='[s]')
+    reduce_exposure_time = Column(REAL, comment='[s]')
+    fit_chi2 = Column(REAL, comment='detectorMap fit, from the reduceExposure log')
+    fit_dof = Column(Integer)
+    fit_x_rms = Column(REAL, comment='[pix]')
+    fit_y_rms = Column(REAL, comment='[pix]')
+    fit_x_soften = Column(REAL, comment='[pix]')
+    fit_y_soften = Column(REAL, comment='[pix]')
+    fit_n_lines = Column(Integer)
+    fit_total_lines = Column(Integer)
+    fit_reserved_chi2 = Column(REAL)
+    fit_reserved_x_rms = Column(REAL, comment='[pix]')
+    fit_reserved_y_rms = Column(REAL, comment='[pix]')
+    fit_reserved_x_soften = Column(REAL, comment='[pix]')
+    fit_reserved_y_soften = Column(REAL, comment='[pix]')
+    fit_reserved_n_lines = Column(Integer)
+
+
+class image_quality_qa_species(Base):
+    '''Per-species detectorMap fit statistics (the Butler's iqQaSpeciesMetrics), long format
+    '''
+    __tablename__ = 'image_quality_qa_species'
+    __table_args__ = (ForeignKeyConstraint(['processing_id', 'pfs_visit_id', 'camera_name'],
+                                           ['image_quality_qa.processing_id',
+                                            'image_quality_qa.pfs_visit_id',
+                                            'image_quality_qa.camera_name'],
+                                           ondelete='CASCADE'), {})
+
+    processing_id = Column(Integer, primary_key=True, autoincrement=False)
+    pfs_visit_id = Column(Integer, primary_key=True, autoincrement=False)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
+    description = Column(String, primary_key=True, autoincrement=False,
+                         comment='line species, Trace included')
+    metric = Column(String, primary_key=True, autoincrement=False,
+                    comment='fitXRms, fitYRms, fitXSoften, fitYSoften')
+    value = Column(REAL)
+
+
+class dm_line_residual_qa(Base):
+    '''dmLineResiduals verdict per detector image (the Butler's dmLineResidualSummary)
+    '''
+    __tablename__ = 'dm_line_residual_qa'
+
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False,
+                          index=True)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
+    spectrograph = Column(Integer)
+    arm = Column(String(1))
+    camera_set = Column(String, comment='the arms the pfsConfig exposed, e.g. brn')
+    obs_type = Column(String)
+    fitted = Column(Boolean, comment='false when the visit detectorMap fit marked no line')
+    n_species = Column(Integer)
+    n_species_measured = Column(Integer)
+    qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
+    qa_decided_by = Column(String)
+    qa_reason = Column(String)
+    recommended_action = Column(String,
+                                comment='NOMINAL, APPLY_SHIFT, RECALIBRATE, INSUFFICIENT_DATA or UNJUDGED')
+    calib_id = Column(String, comment='Butler dataset id of the detectorMap_calib')
+    calib_run = Column(String, comment='Butler RUN of the detectorMap_calib')
+    calib_created = Column(DateTime, comment='CALIB_CREATION_DATE of the detectorMap_calib (the header says the date alone)')
+    calib_first_visit = Column(Integer)
+    calib_last_visit = Column(Integer)
+
+
+class dm_line_residual_qa_metric(Base):
+    '''Line residuals per reference, species, line set and metric (the Butler's dmLineResidualMetrics)
+    '''
+    __tablename__ = 'dm_line_residual_qa_metric'
+    __table_args__ = (ForeignKeyConstraint(['processing_id', 'pfs_visit_id', 'camera_name'],
+                                           ['dm_line_residual_qa.processing_id',
+                                            'dm_line_residual_qa.pfs_visit_id',
+                                            'dm_line_residual_qa.camera_name'],
+                                           ondelete='CASCADE'), {})
+
+    processing_id = Column(Integer, primary_key=True, autoincrement=False)
+    pfs_visit_id = Column(Integer, primary_key=True, autoincrement=False)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
+    reference = Column(String, primary_key=True, autoincrement=False,
+                       comment='calib: detectorMap_calib; visit: the visit detectorMap')
+    description = Column(String, primary_key=True, autoincrement=False,
+                         comment='line species, Trace included')
+    status_type = Column(String, primary_key=True, autoincrement=False,
+                         comment='BOTH, USED, RESERVED or UNFITTED')
+    metric = Column(String, primary_key=True, autoincrement=False,
+                    comment='nLines, linesPerFiber, medianDeltaX, robustRmsDeltaX, medianDeltaY, robustRmsDeltaY')
+    value = Column(REAL)
+    status = Column(String, comment='PASS, WARN or FAIL; empty when not judged')
+
+
+class qa_thresholds(Base):
+    '''A thresholds file the gate judged with (pfs.drp.qa.metrics.calibration.writeThresholds)
+    '''
+    __tablename__ = 'qa_thresholds'
+
+    thresholds_id = Column(Integer, primary_key=True, autoincrement=True)
+    sha256 = Column(String(64), unique=True, nullable=False,
+                    comment='of the file: the same thresholds registered twice are one row')
+    name = Column(String, comment='file name, e.g. iqQaThresholds-run25.yaml')
+    derived_on = Column(DateTime, comment='the day the thresholds were derived (the file says the date alone)')
+    collection = Column(String, comment='the collection the thresholds were derived from')
+    reference_runs = Column(String, comment='comma-separated, e.g. 25,29')
+    drp_qa_version = Column(String)
+    datamodel_version = Column(String)
+    obs_pfs_version = Column(String)
+    drp_stella_version = Column(String)
+    n_entries = Column(Integer)
+    registered_at = Column(DateTime)
+
+
+class qa_threshold_entry(Base):
+    '''One metric and population of a thresholds file
+    '''
+    __tablename__ = 'qa_threshold_entry'
+
+    thresholds_id = Column(Integer,
+                           ForeignKey('qa_thresholds.thresholds_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
+    metric = Column(String, primary_key=True, autoincrement=False)
+    population = Column(String, primary_key=True, autoincrement=False,
+                        comment='the population as key=value pairs, e.g. arm=b obsType=arc')
+    arm = Column(String(1))
+    spectrograph = Column(Integer)
+    obs_type = Column(String)
+    description = Column(String)
+    camera_set = Column(String)
+    reference = Column(String)
+    status_type = Column(String)
+    illumination = Column(String,
+                          comment='null means the default, full: an entry that names no illumination judges PFI frames alone (drp_qa gate.DEFAULT_POPULATION)')
+    higher_is_worse = Column(Boolean)
+    absolute = Column(Boolean)
+    method = Column(String, comment='percentile or tolerance')
+    warn = Column(Float(precision=53), comment='double precision: the file value exactly')
+    fail = Column(Float(precision=53), comment='double precision: the file value exactly')
+    n_good = Column(Integer)
+    n_good_visits = Column(Integer)
+    visit_range = Column(String)
+    reliable = Column(Boolean)
+    fail_bounded = Column(Boolean)
+    degenerate = Column(Boolean)
+    provenance = Column(String)
+
+
+class qa_gate(Base):
+    '''The per-image gate: the worst verdict of the QA tasks on a detector image
+    '''
+    __tablename__ = 'qa_gate'
+
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False,
+                          index=True)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
+    qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
+    decided_by_task = Column(String, comment='imageQualityQa or dmLineResiduals')
+    qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
+    qa_reason = Column(String, comment='every task reason, prefixed by its task')
+    provisional = Column(Boolean,
+                         comment='the reduction pipeline differs from the thresholds (gate.pipelineMismatch)')
+    mode = Column(String, comment='realtime, comparison or backfill')
+    iq_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'))
+    dm_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'))
+    decided_at = Column(DateTime)
 
 
 class cosmic_rays(Base):
