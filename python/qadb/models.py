@@ -1004,6 +1004,8 @@ class image_quality_qa(Base):
                       comment='frame type from W_SEQTYP: arc, trace, object, twilight, dark, ...')
     seq_name = Column(String,
                       comment='W_SEQNAM')
+    illumination = Column(String,
+                          comment='full (PFI fibers) or iis (the engineering fibers lit by the IIS)')
     trace_only = Column(Boolean,
                         comment='FWHM read from the fiberProfiles calibration, not measured')
     med_fwhm = Column(REAL, comment='median FWHM [pix]')
@@ -1164,6 +1166,7 @@ class qa_threshold_entry(Base):
     camera_set = Column(String)
     reference = Column(String)
     status_type = Column(String)
+    illumination = Column(String)
     higher_is_worse = Column(Boolean)
     absolute = Column(Boolean)
     method = Column(String, comment='percentile or tolerance')
