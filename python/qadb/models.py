@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey, DateTime, Boolean, REAL
+from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey, DateTime, Boolean, REAL, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy import UniqueConstraint, ForeignKeyConstraint
@@ -986,13 +986,14 @@ class image_quality_qa(Base):
     __tablename__ = 'image_quality_qa'
 
     processing_id = Column(Integer,
-                           ForeignKey('data_processing_pipe2d.processing_id'),
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
                            primary_key=True,
                            autoincrement=False)
     pfs_visit_id = Column(Integer,
                           ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True,
-                          autoincrement=False)
+                          autoincrement=False,
+                          index=True)
     camera_name = Column(String(2),
                          primary_key=True,
                          autoincrement=False,
@@ -1049,11 +1050,13 @@ class image_quality_qa_species(Base):
     __table_args__ = (ForeignKeyConstraint(['processing_id', 'pfs_visit_id', 'camera_name'],
                                            ['image_quality_qa.processing_id',
                                             'image_quality_qa.pfs_visit_id',
-                                            'image_quality_qa.camera_name']), {})
+                                            'image_quality_qa.camera_name'],
+                                           ondelete='CASCADE'), {})
 
     processing_id = Column(Integer, primary_key=True, autoincrement=False)
     pfs_visit_id = Column(Integer, primary_key=True, autoincrement=False)
-    camera_name = Column(String(2), primary_key=True, autoincrement=False)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
     description = Column(String, primary_key=True, autoincrement=False,
                          comment='line species, Trace included')
     metric = Column(String, primary_key=True, autoincrement=False,
@@ -1067,14 +1070,16 @@ class dm_line_residual_qa(Base):
     __tablename__ = 'dm_line_residual_qa'
 
     processing_id = Column(Integer,
-                           ForeignKey('data_processing_pipe2d.processing_id'),
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
                            primary_key=True,
                            autoincrement=False)
     pfs_visit_id = Column(Integer,
                           ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True,
-                          autoincrement=False)
-    camera_name = Column(String(2), primary_key=True, autoincrement=False)
+                          autoincrement=False,
+                          index=True)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
     spectrograph = Column(Integer)
     arm = Column(String(1))
     camera_set = Column(String, comment='the arms the pfsConfig exposed, e.g. brn')
@@ -1101,11 +1106,13 @@ class dm_line_residual_qa_metric(Base):
     __table_args__ = (ForeignKeyConstraint(['processing_id', 'pfs_visit_id', 'camera_name'],
                                            ['dm_line_residual_qa.processing_id',
                                             'dm_line_residual_qa.pfs_visit_id',
-                                            'dm_line_residual_qa.camera_name']), {})
+                                            'dm_line_residual_qa.camera_name'],
+                                           ondelete='CASCADE'), {})
 
     processing_id = Column(Integer, primary_key=True, autoincrement=False)
     pfs_visit_id = Column(Integer, primary_key=True, autoincrement=False)
-    camera_name = Column(String(2), primary_key=True, autoincrement=False)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
     reference = Column(String, primary_key=True, autoincrement=False,
                        comment='calib: detectorMap_calib; visit: the visit detectorMap')
     description = Column(String, primary_key=True, autoincrement=False,
@@ -1144,7 +1151,7 @@ class qa_threshold_entry(Base):
     __tablename__ = 'qa_threshold_entry'
 
     thresholds_id = Column(Integer,
-                           ForeignKey('qa_thresholds.thresholds_id'),
+                           ForeignKey('qa_thresholds.thresholds_id', ondelete='CASCADE'),
                            primary_key=True,
                            autoincrement=False)
     metric = Column(String, primary_key=True, autoincrement=False)
@@ -1160,8 +1167,8 @@ class qa_threshold_entry(Base):
     higher_is_worse = Column(Boolean)
     absolute = Column(Boolean)
     method = Column(String, comment='percentile or tolerance')
-    warn = Column(REAL)
-    fail = Column(REAL)
+    warn = Column(Float(precision=53), comment='double precision: the file value exactly')
+    fail = Column(Float(precision=53), comment='double precision: the file value exactly')
     n_good = Column(Integer)
     n_good_visits = Column(Integer)
     visit_range = Column(String)
@@ -1177,14 +1184,16 @@ class qa_gate(Base):
     __tablename__ = 'qa_gate'
 
     processing_id = Column(Integer,
-                           ForeignKey('data_processing_pipe2d.processing_id'),
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
                            primary_key=True,
                            autoincrement=False)
     pfs_visit_id = Column(Integer,
                           ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True,
-                          autoincrement=False)
-    camera_name = Column(String(2), primary_key=True, autoincrement=False)
+                          autoincrement=False,
+                          index=True)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
     qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
     decided_by_task = Column(String, comment='imageQualityQa or dmLineResiduals')
     qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')

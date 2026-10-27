@@ -95,7 +95,7 @@ def upgrade() -> None:
         sa.Column('fit_reserved_y_soften', sa.REAL(), nullable=True, comment='[pix]'),
         sa.Column('fit_reserved_n_lines', sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(['pfs_visit_id'], ['pfs_visit.pfs_visit_id']),
-        sa.ForeignKeyConstraint(['processing_id'], ['data_processing_pipe2d.processing_id']),
+        sa.ForeignKeyConstraint(['processing_id'], ['data_processing_pipe2d.processing_id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('processing_id', 'pfs_visit_id', 'camera_name'),
     )
     op.create_table(
@@ -109,7 +109,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ['processing_id', 'pfs_visit_id', 'camera_name'],
             ['image_quality_qa.processing_id', 'image_quality_qa.pfs_visit_id',
-             'image_quality_qa.camera_name']),
+             'image_quality_qa.camera_name'],
+            ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('processing_id', 'pfs_visit_id', 'camera_name', 'description', 'metric'),
     )
     op.create_table(
@@ -137,7 +138,7 @@ def upgrade() -> None:
         sa.Column('calib_first_visit', sa.Integer(), nullable=True),
         sa.Column('calib_last_visit', sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(['pfs_visit_id'], ['pfs_visit.pfs_visit_id']),
-        sa.ForeignKeyConstraint(['processing_id'], ['data_processing_pipe2d.processing_id']),
+        sa.ForeignKeyConstraint(['processing_id'], ['data_processing_pipe2d.processing_id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('processing_id', 'pfs_visit_id', 'camera_name'),
     )
     op.create_table(
@@ -157,7 +158,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ['processing_id', 'pfs_visit_id', 'camera_name'],
             ['dm_line_residual_qa.processing_id', 'dm_line_residual_qa.pfs_visit_id',
-             'dm_line_residual_qa.camera_name']),
+             'dm_line_residual_qa.camera_name'],
+            ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('processing_id', 'pfs_visit_id', 'camera_name', 'reference',
                                 'description', 'status_type', 'metric'),
     )
@@ -196,8 +198,10 @@ def upgrade() -> None:
         sa.Column('higher_is_worse', sa.Boolean(), nullable=True),
         sa.Column('absolute', sa.Boolean(), nullable=True),
         sa.Column('method', sa.String(), nullable=True, comment='percentile or tolerance'),
-        sa.Column('warn', sa.REAL(), nullable=True),
-        sa.Column('fail', sa.REAL(), nullable=True),
+        sa.Column('warn', sa.Float(precision=53), nullable=True,
+                  comment='double precision: the file value exactly'),
+        sa.Column('fail', sa.Float(precision=53), nullable=True,
+                  comment='double precision: the file value exactly'),
         sa.Column('n_good', sa.Integer(), nullable=True),
         sa.Column('n_good_visits', sa.Integer(), nullable=True),
         sa.Column('visit_range', sa.String(), nullable=True),
@@ -205,7 +209,7 @@ def upgrade() -> None:
         sa.Column('fail_bounded', sa.Boolean(), nullable=True),
         sa.Column('degenerate', sa.Boolean(), nullable=True),
         sa.Column('provenance', sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(['thresholds_id'], ['qa_thresholds.thresholds_id']),
+        sa.ForeignKeyConstraint(['thresholds_id'], ['qa_thresholds.thresholds_id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('thresholds_id', 'metric', 'population'),
     )
     op.create_table(
@@ -227,9 +231,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['dm_thresholds_id'], ['qa_thresholds.thresholds_id']),
         sa.ForeignKeyConstraint(['iq_thresholds_id'], ['qa_thresholds.thresholds_id']),
         sa.ForeignKeyConstraint(['pfs_visit_id'], ['pfs_visit.pfs_visit_id']),
-        sa.ForeignKeyConstraint(['processing_id'], ['data_processing_pipe2d.processing_id']),
+        sa.ForeignKeyConstraint(['processing_id'], ['data_processing_pipe2d.processing_id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('processing_id', 'pfs_visit_id', 'camera_name'),
     )
+
+    for table in ('image_quality_qa', 'dm_line_residual_qa', 'qa_gate'):
+        op.create_index(f'ix_{table}_pfs_visit_id', table, ['pfs_visit_id'])
 
 
 def downgrade() -> None:
