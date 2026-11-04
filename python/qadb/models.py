@@ -1199,7 +1199,7 @@ class qa_gate(Base):
     camera_name = Column(String(2), primary_key=True, autoincrement=False,
                          comment='arm and spectrograph, e.g. b1')
     qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
-    decided_by_task = Column(String, comment='imageQualityQa or dmLineResiduals')
+    decided_by_task = Column(String, comment='imageQualityQa, dmLineResiduals or twilightQa')
     qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
     qa_reason = Column(String, comment='every task reason, prefixed by its task')
     provisional = Column(Boolean,
@@ -1207,38 +1207,25 @@ class qa_gate(Base):
     mode = Column(String, comment='realtime, comparison or backfill')
     iq_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'))
     dm_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'))
+    twilight_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'),
+                                    comment='the twilight thresholds file a twilight image was judged with (INSTRM-3089)')
     decided_at = Column(DateTime)
 
 
 
+
 class twilight_qa(Base):
-    '''Whether each exposure of a twilight sequence is a good flat, per arm: drp_qa's twilightQa.py
-    judges the sequence's exposures against each other once the sequence is complete (PIPE2D-1973,
-    INSTRM-3089). One row per exposure and judged arm; a re-judgement replaces the sequence's rows.
+    '''The twilight sequence check on a detector image: drp_qa's twilightQa.py judges each exposure of a
+    twilight sequence against the sequence's others once it is complete (PIPE2D-1973, INSTRM-3089) and
+    stores the verdict per image as twilightQaMetrics; the loader copies it here and folds it into qa_gate
+    as the task twilightQa. Keyed like the other per-image tables, by the processing (collection and RUN).
     '''
     __tablename__ = 'twilight_qa'
 
-    pfs_visit_id = Column(Integer,
-                          ForeignKey('pfs_visit.pfs_visit_id'),
-                          primary_key=True,
-                          autoincrement=False,
-                          index=True)
-    arm = Column(String(1), primary_key=True, autoincrement=False)
-    iic_sequence_id = Column(Integer, index=True, comment='the IIC sequence judged (opdb iic_sequence)')
-    qa_status = Column(String, comment='PASS, WARN, FAIL or TOO_FAINT (below the brightness floor: not a flat)')
-    qa_reason = Column(String, comment='the WARN and FAIL reasons, ;-joined; empty on a PASS')
-    twilight_arm_mean = Column(REAL, comment="RMS of the mean of each fiber's b and r residuals [%]")
-    twilight_arm_half_diff = Column(REAL, comment="RMS of half the difference of each fiber's b and r residuals [%]")
-    collection_name = Column(String, comment='the collection the twilightFiberFlux tables were read from')
-    drp_qa_version = Column(String, comment='the drp_qa that judged')
-    judged_at = Column(DateTime)
-
-
-class twilight_qa_metric(Base):
-    '''The measurements behind twilight_qa, per detector image (drp_qa metrics.twilight.sequenceConsistency)
-    '''
-    __tablename__ = 'twilight_qa_metric'
-
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
     pfs_visit_id = Column(Integer,
                           ForeignKey('pfs_visit.pfs_visit_id'),
                           primary_key=True,
@@ -1248,7 +1235,7 @@ class twilight_qa_metric(Base):
                          comment='arm and spectrograph, e.g. b1')
     spectrograph = Column(Integer)
     arm = Column(String(1))
-    iic_sequence_id = Column(Integer, index=True, comment='the IIC sequence judged (opdb iic_sequence)')
+    iic_sequence_id = Column(Integer, index=True, comment='the IIC sequence judged (opdb iic_sequence; W_SEQID)')
     seq_name = Column(String, comment='W_SEQNAM')
     n_exposures = Column(Integer, comment='exposures of the sequence in this arm')
     snr = Column(REAL, comment='median S/N per pixel of the exposure in this arm')
@@ -1267,6 +1254,10 @@ class twilight_qa_metric(Base):
                             comment="deepest coherent deviation: largest |median| over a fiber's nearest neighbours [%]")
     twilight_arm_mean = Column(REAL, comment="RMS of the mean of each fiber's b and r residuals [%]")
     twilight_arm_half_diff = Column(REAL, comment="RMS of half the difference of each fiber's b and r residuals [%]")
+    qa_status = Column(String,
+                       comment="PASS, WARN or FAIL: the worst of the detector's level offset and its arm's RMS and patch; UNKNOWN for an arm the thresholds leave out (n)")
+    qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
+    qa_reason = Column(String)
 
 class cosmic_rays(Base):
     '''Quality of the cosmic rays detection for the visit

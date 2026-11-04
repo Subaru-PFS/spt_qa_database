@@ -1,13 +1,15 @@
-"""INSTRM-3089: twilight sequence verdicts
+"""INSTRM-3089: the twilight sequence check in the per-image gate
 
-twilight_qa (per exposure and arm: PASS, WARN, FAIL or TOO_FAINT with the reasons) and
-twilight_qa_metric (the measurements per detector image), written by drp_qa's
-bin.src/twilightQa.py once a twilight sequence is complete (PIPE2D-1973), from
-ics_qaActor after each visit's QA. Version 0.3.0.
+twilight_qa: drp_qa's twilightQa.py judges each exposure of a twilight sequence
+against the sequence's others once it is complete (PIPE2D-1973) and stores the
+verdict per detector image in the Butler (twilightQaMetrics); the qadb loader
+copies it here, keyed by the processing like image_quality_qa, and folds it into
+qa_gate as a third task, twilightQa, citing the thresholds file it judged with
+(qa_gate.twilight_thresholds_id). Version 0.3.0.
 
 Revision ID: 5d2e8f71c0b3
 Revises: a7c3e5d91b24
-Create Date: 2026-11-03 12:00:00.000000
+Create Date: 2026-11-04 12:00:00.000000
 
 """
 from typing import Sequence, Union
@@ -26,37 +28,14 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         'twilight_qa',
-        sa.Column('pfs_visit_id', sa.Integer(), autoincrement=False, nullable=False),
-        sa.Column('arm', sa.String(length=1), autoincrement=False, nullable=False),
-        sa.Column('iic_sequence_id', sa.Integer(), nullable=True,
-                  comment='the IIC sequence judged (opdb iic_sequence)'),
-        sa.Column('qa_status', sa.String(), nullable=True,
-                  comment='PASS, WARN, FAIL or TOO_FAINT (below the brightness floor: not a flat)'),
-        sa.Column('qa_reason', sa.String(), nullable=True,
-                  comment='the WARN and FAIL reasons, ;-joined; empty on a PASS'),
-        sa.Column('twilight_arm_mean', sa.REAL(), nullable=True,
-                  comment="RMS of the mean of each fiber's b and r residuals [%]"),
-        sa.Column('twilight_arm_half_diff', sa.REAL(), nullable=True,
-                  comment="RMS of half the difference of each fiber's b and r residuals [%]"),
-        sa.Column('collection_name', sa.String(), nullable=True,
-                  comment='the collection the twilightFiberFlux tables were read from'),
-        sa.Column('drp_qa_version', sa.String(), nullable=True, comment='the drp_qa that judged'),
-        sa.Column('judged_at', sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(['pfs_visit_id'], ['pfs_visit.pfs_visit_id']),
-        sa.PrimaryKeyConstraint('pfs_visit_id', 'arm'),
-    )
-    op.create_index(op.f('ix_twilight_qa_pfs_visit_id'), 'twilight_qa', ['pfs_visit_id'], unique=False)
-    op.create_index(op.f('ix_twilight_qa_iic_sequence_id'), 'twilight_qa', ['iic_sequence_id'], unique=False)
-
-    op.create_table(
-        'twilight_qa_metric',
+        sa.Column('processing_id', sa.Integer(), autoincrement=False, nullable=False),
         sa.Column('pfs_visit_id', sa.Integer(), autoincrement=False, nullable=False),
         sa.Column('camera_name', sa.String(length=2), autoincrement=False, nullable=False,
                   comment='arm and spectrograph, e.g. b1'),
         sa.Column('spectrograph', sa.Integer(), nullable=True),
         sa.Column('arm', sa.String(length=1), nullable=True),
         sa.Column('iic_sequence_id', sa.Integer(), nullable=True,
-                  comment='the IIC sequence judged (opdb iic_sequence)'),
+                  comment='the IIC sequence judged (opdb iic_sequence; W_SEQID)'),
         sa.Column('seq_name', sa.String(), nullable=True, comment='W_SEQNAM'),
         sa.Column('n_exposures', sa.Integer(), nullable=True, comment='exposures of the sequence in this arm'),
         sa.Column('snr', sa.REAL(), nullable=True, comment='median S/N per pixel of the exposure in this arm'),
@@ -81,19 +60,31 @@ def upgrade() -> None:
                   comment="RMS of the mean of each fiber's b and r residuals [%]"),
         sa.Column('twilight_arm_half_diff', sa.REAL(), nullable=True,
                   comment="RMS of half the difference of each fiber's b and r residuals [%]"),
+        sa.Column('qa_status', sa.String(), nullable=True,
+                  comment="PASS, WARN or FAIL: the worst of the detector's level offset and its arm's RMS and patch; UNKNOWN for an arm the thresholds leave out (n)"),
+        sa.Column('qa_decided_by', sa.String(), nullable=True, comment='the metric that decided a WARN or FAIL'),
+        sa.Column('qa_reason', sa.String(), nullable=True),
+        sa.ForeignKeyConstraint(['processing_id'], ['data_processing_pipe2d.processing_id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['pfs_visit_id'], ['pfs_visit.pfs_visit_id']),
-        sa.PrimaryKeyConstraint('pfs_visit_id', 'camera_name'),
+        sa.PrimaryKeyConstraint('processing_id', 'pfs_visit_id', 'camera_name'),
     )
-    op.create_index(op.f('ix_twilight_qa_metric_pfs_visit_id'), 'twilight_qa_metric', ['pfs_visit_id'],
-                    unique=False)
-    op.create_index(op.f('ix_twilight_qa_metric_iic_sequence_id'), 'twilight_qa_metric', ['iic_sequence_id'],
-                    unique=False)
+    op.create_index(op.f('ix_twilight_qa_pfs_visit_id'), 'twilight_qa', ['pfs_visit_id'], unique=False)
+    op.create_index(op.f('ix_twilight_qa_iic_sequence_id'), 'twilight_qa', ['iic_sequence_id'], unique=False)
+
+    op.add_column('qa_gate',
+                  sa.Column('twilight_thresholds_id', sa.Integer(), nullable=True,
+                            comment='the twilight thresholds file a twilight image was judged with (INSTRM-3089)'))
+    op.create_foreign_key(op.f('fk_qa_gate_twilight_thresholds_id_qa_thresholds'), 'qa_gate', 'qa_thresholds',
+                          ['twilight_thresholds_id'], ['thresholds_id'])
+    op.alter_column('qa_gate', 'decided_by_task', comment='imageQualityQa, dmLineResiduals or twilightQa',
+                    existing_type=sa.String(), existing_comment='imageQualityQa or dmLineResiduals')
 
 
 def downgrade() -> None:
-    op.drop_index(op.f('ix_twilight_qa_metric_iic_sequence_id'), table_name='twilight_qa_metric')
-    op.drop_index(op.f('ix_twilight_qa_metric_pfs_visit_id'), table_name='twilight_qa_metric')
-    op.drop_table('twilight_qa_metric')
+    op.alter_column('qa_gate', 'decided_by_task', comment='imageQualityQa or dmLineResiduals',
+                    existing_type=sa.String(), existing_comment='imageQualityQa, dmLineResiduals or twilightQa')
+    op.drop_constraint(op.f('fk_qa_gate_twilight_thresholds_id_qa_thresholds'), 'qa_gate', type_='foreignkey')
+    op.drop_column('qa_gate', 'twilight_thresholds_id')
     op.drop_index(op.f('ix_twilight_qa_iic_sequence_id'), table_name='twilight_qa')
     op.drop_index(op.f('ix_twilight_qa_pfs_visit_id'), table_name='twilight_qa')
     op.drop_table('twilight_qa')
