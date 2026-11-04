@@ -1210,6 +1210,64 @@ class qa_gate(Base):
     decided_at = Column(DateTime)
 
 
+
+class twilight_qa(Base):
+    '''Whether each exposure of a twilight sequence is a good flat, per arm: drp_qa's twilightQa.py
+    judges the sequence's exposures against each other once the sequence is complete (PIPE2D-1973,
+    INSTRM-3089). One row per exposure and judged arm; a re-judgement replaces the sequence's rows.
+    '''
+    __tablename__ = 'twilight_qa'
+
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False,
+                          index=True)
+    arm = Column(String(1), primary_key=True, autoincrement=False)
+    iic_sequence_id = Column(Integer, index=True, comment='the IIC sequence judged (opdb iic_sequence)')
+    qa_status = Column(String, comment='PASS, WARN, FAIL or TOO_FAINT (below the brightness floor: not a flat)')
+    qa_reason = Column(String, comment='the WARN and FAIL reasons, ;-joined; empty on a PASS')
+    twilight_arm_mean = Column(REAL, comment="RMS of the mean of each fiber's b and r residuals [%]")
+    twilight_arm_half_diff = Column(REAL, comment="RMS of half the difference of each fiber's b and r residuals [%]")
+    collection_name = Column(String, comment='the collection the twilightFiberFlux tables were read from')
+    drp_qa_version = Column(String, comment='the drp_qa that judged')
+    judged_at = Column(DateTime)
+
+
+class twilight_qa_metric(Base):
+    '''The measurements behind twilight_qa, per detector image (drp_qa metrics.twilight.sequenceConsistency)
+    '''
+    __tablename__ = 'twilight_qa_metric'
+
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False,
+                          index=True)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
+    spectrograph = Column(Integer)
+    arm = Column(String(1))
+    iic_sequence_id = Column(Integer, index=True, comment='the IIC sequence judged (opdb iic_sequence)')
+    seq_name = Column(String, comment='W_SEQNAM')
+    n_exposures = Column(Integer, comment='exposures of the sequence in this arm')
+    snr = Column(REAL, comment='median S/N per pixel of the exposure in this arm')
+    brightness = Column(REAL, comment='median S/N per pixel of the exposure in the brightness arm (b)')
+    too_faint = Column(Boolean, comment='below the brightness floor: not a good flat; the RMS is not measured')
+    n_reference = Column(Integer,
+                         comment='bright exposures in the reference median, this one included; 0 when the RMS is not measured')
+    noise = Column(REAL, comment='photon noise expected in the RMS [%]')
+    sat_fraction = Column(REAL, comment="largest saturated fraction of a fiber's window on the detector")
+    n_measured = Column(Integer, comment='fibers of the detector with a measured flux in this exposure')
+    twilight_level_offset = Column(REAL,
+                                   comment="the detector's level against the sequence's, over the field's [%]; null with no measured fiber or no reference")
+    twilight_resid_rms = Column(REAL,
+                                comment="field RMS beyond photon noise against the sequence's other bright exposures [%]")
+    twilight_patch = Column(REAL,
+                            comment="deepest coherent deviation: largest |median| over a fiber's nearest neighbours [%]")
+    twilight_arm_mean = Column(REAL, comment="RMS of the mean of each fiber's b and r residuals [%]")
+    twilight_arm_half_diff = Column(REAL, comment="RMS of half the difference of each fiber's b and r residuals [%]")
+
 class cosmic_rays(Base):
     '''Quality of the cosmic rays detection for the visit
     '''
