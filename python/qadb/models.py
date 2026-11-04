@@ -1212,8 +1212,6 @@ class qa_gate(Base):
     decided_at = Column(DateTime)
 
 
-
-
 class twilight_qa(Base):
     '''The twilight sequence check on a detector image: drp_qa's twilightQa.py judges each exposure of a
     twilight sequence against the sequence's others once it is complete (PIPE2D-1973, INSTRM-3089) and
@@ -1258,6 +1256,7 @@ class twilight_qa(Base):
                        comment="PASS, WARN or FAIL: the worst of the detector's level offset and its arm's RMS and patch; UNKNOWN for an arm the thresholds leave out (n)")
     qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
     qa_reason = Column(String)
+
 
 class cosmic_rays(Base):
     '''Quality of the cosmic rays detection for the visit
