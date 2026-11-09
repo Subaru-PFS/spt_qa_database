@@ -1209,26 +1209,24 @@ class qa_gate(Base):
     decided_at = Column(DateTime)
 
 
-class qa_gate_thresholds(Base):
-    '''Every thresholds layer a task judged a detector image with, in the order judged (PIPE2D-1991)
+class qa_processing_thresholds(Base):
+    '''Every thresholds layer a task judged a processing's images with, in the order judged (PIPE2D-1991)
 
     A task judges each metric by the first of its layers with an entry for the image's population:
     its thresholds file(s), then its config's threshold fields (qa_thresholds.name <task>.config).
-    The one record of what judged an image: qa_gate's per-task *_thresholds_id columns, which cited
-    the first layer alone, went with it, so a metric a later layer judged (the drift rows of
-    dmLineResiduals, judged by the config's fields) has its limits here like the rest.
+    A RUN has one config, so its images share their layers: one row per processing, task and layer,
+    keyed by the task's own processing (image_quality_qa.processing_id, dm_line_residual_qa.processing_id,
+    twilight_qa.processing_id). The one record of what judged an image: qa_gate's per-task
+    *_thresholds_id columns, which cited the first layer alone per image, went with it, so a metric a
+    later layer judged (the drift rows of dmLineResiduals, judged by the config's fields) has its limits
+    here like the rest.
     '''
-    __tablename__ = 'qa_gate_thresholds'
-    __table_args__ = (ForeignKeyConstraint(['processing_id', 'pfs_visit_id', 'camera_name'],
-                                           ['qa_gate.processing_id',
-                                            'qa_gate.pfs_visit_id',
-                                            'qa_gate.camera_name'],
-                                           ondelete='CASCADE'), {})
+    __tablename__ = 'qa_processing_thresholds'
 
-    processing_id = Column(Integer, primary_key=True, autoincrement=False)
-    pfs_visit_id = Column(Integer, primary_key=True, autoincrement=False)
-    camera_name = Column(String(2), primary_key=True, autoincrement=False,
-                         comment='arm and spectrograph, e.g. b1')
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
     task = Column(String, primary_key=True, autoincrement=False,
                   comment='imageQualityQa, dmLineResiduals or twilightQa')
     layer = Column(Integer, primary_key=True, autoincrement=False,
