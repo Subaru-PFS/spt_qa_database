@@ -14,7 +14,7 @@ document with a content hash and registered in qa_thresholds under the name
 
 The three qa_gate columns go: what they cited becomes each processing and
 task's layer 0 (the ids were the same for every image of a RUN; the smallest is
-kept should they differ), and the new table is the one record. Version 0.4.0.
+kept should they differ), and the new table is the one record. Version 0.5.0.
 
 Revision ID: acbd1a9681d6
 Revises: 5d2e8f71c0b3
