@@ -1,0 +1,102 @@
+# Regenerate diagrams/schema.pdf whenever the models change on main.
+#
+# The schema is built from python/qadb/models.py in a throwaway Postgres,
+# drawn with SchemaCrawler (the same tool used for the hand-made diagrams)
+# and committed back to main. Pushes made with GITHUB_TOKEN do not trigger
+# workflows, so the commit cannot start another run.
+name: Schema diagram
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - python/qadb/models.py
+      - .github/workflows/schema-diagram.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: schema-diagram
+  cancel-in-progress: false
+
+env:
+  SC_VERSION: "18.0.1"
+  SC_SHA512: "0e9ae6aa5c990a2e1a3934de8bb2b98c7828650f27de59bb947f1e9fce02f6486ddbacfd655c2293338ed92765ddd501c3b7f88d237eb0c373ecbda022fd71f7"
+
+jobs:
+  diagram:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: qadb
+          POSTGRES_DB: qadb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create the schema from the models
+        run: |
+          pip install .
+          python -m qadb.models postgresql+psycopg://postgres:qadb@localhost:5432/qadb
+
+      # SchemaCrawler needs Java 17+; Temurin 21 is preinstalled on the runner.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Cache SchemaCrawler
+        id: sc-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/schemacrawler
+          key: schemacrawler-${{ env.SC_VERSION }}
+
+      - name: Download SchemaCrawler
+        if: steps.sc-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o sc.zip "https://github.com/schemacrawler/SchemaCrawler/releases/download/v${SC_VERSION}/schemacrawler-${SC_VERSION}-bin.zip"
+          echo "${SC_SHA512}  sc.zip" | sha512sum -c -
+          mkdir -p ~/schemacrawler
+          unzip -q sc.zip -d ~/schemacrawler
+
+      - name: Install graphviz
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends graphviz
+
+      - name: Draw the schema
+        run: |
+          ~/schemacrawler/schemacrawler-${SC_VERSION}-bin/bin/schemacrawler.sh \
+            --server=postgresql --host=localhost --port=5432 \
+            --database=qadb --schemas=public --user=postgres --password=qadb \
+            --info-level=standard --command=schema --portable=names --no-remarks \
+            --title='PFS QA Database (qaDB)' \
+            --output-format=pdf --output-file=diagrams/schema.pdf
+          ls -l diagrams/schema.pdf
+
+      - name: Commit the diagram
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diagrams/schema.pdf
+          if git diff --cached --quiet; then
+            echo "schema.pdf unchanged"
+          else
+            git commit -m "Update schema diagram for ${GITHUB_SHA::7}"
+            git push
+          fi
