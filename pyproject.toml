@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qadb"
+version = "0.4.0"
+description = "PFS QA database (qaDB) tools"
+authors = [
+    { name = "Kiyoto Yabe" },
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "sqlalchemy",
+    "psycopg[binary]",
+]
+
+[project.urls]
+Homepage = "https://github.com/Subaru-PFS/spt_qa_database"
+
+[project.optional-dependencies]
+dev = [
+    "numpy",
+    "pandas",
+    "astropy",
+    "pytest",
+    "alembic",
+    "pylint",
+]
+
+[tool.setuptools.packages.find]
+where = ["python/"]
+include = ["qadb", "qadb.*"]
