@@ -1128,14 +1128,15 @@ class dm_line_residual_qa_metric(Base):
 
 
 class qa_thresholds(Base):
-    '''A thresholds file the gate judged with (pfs.drp.qa.metrics.calibration.writeThresholds)
+    '''A thresholds table the gate judged with: a file (pfs.drp.qa.metrics.calibration.writeThresholds), or a
+    task config's threshold fields written as one (pfs.drp.qa.metrics.gate.thresholdsDocument, PIPE2D-1991)
     '''
     __tablename__ = 'qa_thresholds'
 
     thresholds_id = Column(Integer, primary_key=True, autoincrement=True)
     sha256 = Column(String(64), unique=True, nullable=False,
                     comment='of the file: the same thresholds registered twice are one row')
-    name = Column(String, comment='file name, e.g. iqQaThresholds-run25.yaml')
+    name = Column(String, comment='file name, e.g. iqQaThresholds-run25.yaml; <task>.config for a config layer')
     derived_on = Column(DateTime, comment='the day the thresholds were derived (the file says the date alone)')
     collection = Column(String, comment='the collection the thresholds were derived from')
     reference_runs = Column(String, comment='comma-separated, e.g. 25,29')
@@ -1205,11 +1206,32 @@ class qa_gate(Base):
     provisional = Column(Boolean,
                          comment='the reduction pipeline differs from the thresholds (gate.pipelineMismatch)')
     mode = Column(String, comment='realtime, comparison or backfill')
-    iq_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'))
-    dm_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'))
-    twilight_thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'),
-                                    comment='the twilight thresholds file a twilight image was judged with (INSTRM-3089)')
     decided_at = Column(DateTime)
+
+
+class qa_processing_thresholds(Base):
+    '''Every thresholds layer a task judged a processing's images with, in the order judged (PIPE2D-1991)
+
+    A task judges each metric by the first of its layers with an entry for the image's population:
+    its thresholds file(s), then its config's threshold fields (qa_thresholds.name <task>.config).
+    A RUN has one config, so its images share their layers: one row per processing, task and layer,
+    keyed by the task's own processing (image_quality_qa.processing_id, dm_line_residual_qa.processing_id,
+    twilight_qa.processing_id). The one record of what judged an image: qa_gate's per-task
+    *_thresholds_id columns, which cited the first layer alone per image, went with it, so a metric a
+    later layer judged (the drift rows of dmLineResiduals, judged by the config's fields) has its limits
+    here like the rest.
+    '''
+    __tablename__ = 'qa_processing_thresholds'
+
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
+    task = Column(String, primary_key=True, autoincrement=False,
+                  comment='imageQualityQa, dmLineResiduals or twilightQa')
+    layer = Column(Integer, primary_key=True, autoincrement=False,
+                   comment='position in the order judged, from 0; a layer that could not be cited leaves a gap')
+    thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'), nullable=False)
 
 
 class twilight_qa(Base):
