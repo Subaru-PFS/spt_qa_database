@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
+requires = ["setuptools >= 77.0.3", "lsst-versions"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "qadb"
-version = "0.6.0"
+dynamic = ["version"]
 description = "PFS QA database (qaDB) tools"
 authors = [
     { name = "Kiyoto Yabe" },
@@ -32,3 +32,6 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["python/"]
 include = ["qadb", "qadb.*"]
+
+[tool.lsst_versions]
+write_to = "python/qadb/version.py"

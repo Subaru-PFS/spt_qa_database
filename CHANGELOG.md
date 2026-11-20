@@ -26,6 +26,8 @@ Revision `c9e4f2a6d813`. Goes with drp_qa from 0.5.0.
   `lines_per_fiber` of `image_quality_qa`, `value` of `dm_line_residual_qa_metric`, and `twilight_level_offset`,
   `twilight_resid_rms` and `twilight_patch` of `twilight_qa`. A value already stored keeps its single-precision
   digits.
+- **The version comes from the git tag** — `lsst-versions` reads it at build time, as in `drp_qa` and
+  `pfs_utils`; `pyproject.toml` no longer states one. A build from a clone without tags is `0.0.1.dev1`.
 
 ### Removed
 

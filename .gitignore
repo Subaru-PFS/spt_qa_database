@@ -11,3 +11,4 @@ alembic/qadb/alembic/__pycache__/
 alembic/qadb_e2e/db.cfg
 alembic/qadb_e2e/alembic/__pycache__/
 .venv
+python/qadb/version.py
