@@ -6,6 +6,8 @@ alembic revision (`alembic/qadb`) that brings a database to it.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-20
+
 Revision `c9e4f2a6d813`. Goes with drp_qa from 0.5.0.
 
 ### Added
