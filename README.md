@@ -34,8 +34,4 @@ PYTHONPATH=../../python alembic upgrade head
 ```
 
 Take a dump before a migration that drops tables or columns: a downgrade restores the schema, not the rows.
-
-| Version | Revision | Goes with |
-|---|---|---|
-| 0.6.0 | `c9e4f2a6d813` | drp_qa from 0.5.0: one verdict per image in `qa_gate`, `qa_normal_value`, no thresholds tables. Drops the verdict columns of the numbers tables and the three thresholds tables with their rows. |
-| 0.5.0 | `acbd1a9681d6` | drp_qa 0.3.1 to 0.4.1: `qa_processing_thresholds` |
+`CHANGELOG.md` says what each version changed and which revision brings a database to it.
