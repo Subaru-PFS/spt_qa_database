@@ -29,6 +29,7 @@ Revision `c9e4f2a6d813`. Goes with drp_qa from 0.5.0.
 - **The version comes from the git tag** — `lsst-versions` reads it at build time, as in `drp_qa` and
   `pfs_utils`; `pyproject.toml` no longer states one. A tagged commit builds as its tag and a later one as a development
   version of the next; a clone without the tags builds as a `0.0` development version.
+- **Python 3.12 or later** — was 3.10.
 
 ### Removed
 
