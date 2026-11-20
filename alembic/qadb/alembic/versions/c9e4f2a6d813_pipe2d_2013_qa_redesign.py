@@ -23,7 +23,7 @@ single-precision digits.
 Rows: every measured number stays, and so does every qa_gate row, with
 frame_type null for a verdict of the earlier gate. What the dropped columns and
 tables held is not copied: take a dump first. The downgrade restores the schema,
-not those rows. Version 0.6.0.
+not those rows, and drops what the new tables and columns hold. Version 0.6.0.
 
 Revision ID: c9e4f2a6d813
 Revises: acbd1a9681d6
@@ -79,8 +79,9 @@ _VERDICTS = (
     ('twilight_qa', 'qa_reason', None),
 )
 
-_FRAME_TYPE = ('the frame type judged: science, allsky, arc, quartz, twilight, iisArc or iisQuartz;'
-               ' null for a frame with no type, and for a verdict of the gate before the redesign')
+_FRAME_TYPE = ('the frame type the gate gave the image (drp_qa metrics.registry): one it judges, e.g. science, arc,'
+               ' quartz, twilight or iisArc, or one it does not, e.g. dark; null for a frame with no type, and for a'
+               ' verdict of the gate before the redesign')
 
 _SEQ_TYPE = "the raw sequence type (W_SEQTYP; the opdb's iic_sequence.sequence_type), e.g. scienceArc, darks, fiberProfiles"
 _LAMPS = ('the lamps the header says were lit, as obs_pfs getLamps names them, sorted and joined with +,'
@@ -93,10 +94,18 @@ _CLASSIFICATION = (
     ('dm_line_residual_qa', 'seq_type', _SEQ_TYPE),
 )
 
-#: qa_gate comments that change, as (column, before, after).
-_GATE_COMMENTS = (
-    ('qa_decided_by', _DECIDED_BY, 'the check that decided a WARN or FAIL'),
-    ('qa_reason', 'every task reason, prefixed by its task', 'the check, the value and the limit crossed'),
+#: Comments that change on columns that stay, as (table, column, before, after).
+_COMMENTS = (
+    ('qa_gate', 'qa_decided_by', _DECIDED_BY, 'the check that decided a WARN or FAIL'),
+    ('qa_gate', 'qa_reason', 'every task reason, prefixed by its task',
+     'the check, the value and the limit crossed; on UNKNOWN, why nothing was judged'),
+    ('image_quality_qa', 'obs_type', 'frame type from W_SEQTYP: arc, trace, object, twilight, dark, ...',
+     'the kind of frame as imageQualityQa records it, e.g. arc, trace, science, allsky, twilight or dark;'
+     ' the raw sequence type is seq_type'),
+    ('image_quality_qa', 'calexp_run', 'Butler RUN of the calexp judged', 'Butler RUN of the calexp measured'),
+    ('dm_line_residual_qa_metric', 'metric',
+     'nLines, linesPerFiber, medianDeltaX, robustRmsDeltaX, medianDeltaY, robustRmsDeltaY',
+     'nLines, linesPerFiber, medianDeltaX, robustRmsDeltaX, medianDeltaY, robustRmsDeltaY, medianDeltaYKms'),
 )
 
 
@@ -160,8 +169,8 @@ def upgrade() -> None:
         op.drop_column(table, column)
     op.drop_column('qa_gate', 'decided_by_task')
     op.drop_column('qa_gate', 'provisional')
-    for column, before, after in _GATE_COMMENTS:
-        op.alter_column('qa_gate', column, existing_type=sa.String(), comment=after, existing_comment=before)
+    for table, column, before, after in _COMMENTS:
+        op.alter_column(table, column, existing_type=sa.String(), comment=after, existing_comment=before)
 
     for table, column, comment in _DOUBLES:
         op.alter_column(table, column, existing_type=sa.REAL(), type_=sa.Float(precision=53),
@@ -247,8 +256,8 @@ def downgrade() -> None:
         op.alter_column(table, column, existing_type=sa.Float(precision=53), type_=sa.REAL(),
                         existing_comment=_joined(comment, _GATE_READS), comment=comment)
 
-    for column, before, after in _GATE_COMMENTS:
-        op.alter_column('qa_gate', column, existing_type=sa.String(), comment=before, existing_comment=after)
+    for table, column, before, after in _COMMENTS:
+        op.alter_column(table, column, existing_type=sa.String(), comment=before, existing_comment=after)
     op.add_column('qa_gate',
                   sa.Column('provisional', sa.Boolean(), nullable=True,
                             comment='the reduction pipeline differs from the thresholds (gate.pipelineMismatch)'))

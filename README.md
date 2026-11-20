@@ -8,7 +8,8 @@ pip install .          # library: sqlalchemy and psycopg (3)
 pip install -e '.[dev]'  # plus alembic, pytest, pandas, ...
 ```
 
-The version is the latest git tag (`lsst-versions`), so install from a clone that has the tags.
+The version comes from the git tags (`lsst-versions`): a tagged commit is that version, a later commit a
+development version of the next. Install from a clone that has the tags.
 
 Connect with a `postgresql+psycopg://user@host:port/dbname` URL. SQLAlchemy 2.1
 also accepts plain `postgresql://` for psycopg 3, but older versions map that to
@@ -35,5 +36,7 @@ PYTHONPATH=../../python alembic current
 PYTHONPATH=../../python alembic upgrade head
 ```
 
-Take a dump before a migration that drops tables or columns: a downgrade restores the schema, not the rows.
+Stop whatever writes to the database first (qaActor's loader): a migration holds exclusive locks on the tables
+it changes until it commits. Take a dump before a migration that drops tables or columns: a downgrade restores
+the schema, not the rows.
 `CHANGELOG.md` says what each version changed and which revision brings a database to it.

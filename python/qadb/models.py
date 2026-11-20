@@ -1001,7 +1001,7 @@ class image_quality_qa(Base):
     spectrograph = Column(Integer)
     arm = Column(String(1))
     obs_type = Column(String,
-                      comment='frame type from W_SEQTYP: arc, trace, object, twilight, dark, ...')
+                      comment='the kind of frame as imageQualityQa records it, e.g. arc, trace, science, allsky, twilight or dark; the raw sequence type is seq_type')
     seq_name = Column(String,
                       comment='W_SEQNAM')
     seq_type = Column(String,
@@ -1027,7 +1027,7 @@ class image_quality_qa(Base):
     n_trace_rows = Column(Integer, comment='trace centroids in lines')
     n_saturated_lines = Column(Integer, comment='lamp or sky lines saturated at their expected position (the SAT mask plane of the calexp)')
     pct_saturated_pixels = Column(REAL, comment="per cent of the pixels within the lit fibers' apertures that are saturated")
-    calexp_run = Column(String, comment='Butler RUN of the calexp judged')
+    calexp_run = Column(String, comment='Butler RUN of the calexp measured')
     isr_bad_pixels = Column(Integer)
     isr_time = Column(REAL, comment='[s]')
     cosmic_ray_count = Column(Integer)
@@ -1124,7 +1124,7 @@ class dm_line_residual_qa_metric(Base):
     status_type = Column(String, primary_key=True, autoincrement=False,
                          comment='BOTH, USED, RESERVED or UNFITTED')
     metric = Column(String, primary_key=True, autoincrement=False,
-                    comment='nLines, linesPerFiber, medianDeltaX, robustRmsDeltaX, medianDeltaY, robustRmsDeltaY')
+                    comment='nLines, linesPerFiber, medianDeltaX, robustRmsDeltaX, medianDeltaY, robustRmsDeltaY, medianDeltaYKms')
     value = Column(Float(precision=53), comment='double precision: the gate reads it')
 
 
@@ -1145,10 +1145,10 @@ class qa_gate(Base):
     camera_name = Column(String(2), primary_key=True, autoincrement=False,
                          comment='arm and spectrograph, e.g. b1')
     frame_type = Column(String,
-                        comment='the frame type judged: science, allsky, arc, quartz, twilight, iisArc or iisQuartz; null for a frame with no type, and for a verdict of the gate before the redesign')
+                        comment='the frame type the gate gave the image (drp_qa metrics.registry): one it judges, e.g. science, arc, quartz, twilight or iisArc, or one it does not, e.g. dark; null for a frame with no type, and for a verdict of the gate before the redesign')
     qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
     qa_decided_by = Column(String, comment='the check that decided a WARN or FAIL')
-    qa_reason = Column(String, comment='the check, the value and the limit crossed')
+    qa_reason = Column(String, comment='the check, the value and the limit crossed; on UNKNOWN, why nothing was judged')
     mode = Column(String, comment='realtime, comparison or backfill')
     decided_at = Column(DateTime)
 

@@ -27,7 +27,8 @@ Revision `c9e4f2a6d813`. Goes with drp_qa from 0.5.0.
   `twilight_resid_rms` and `twilight_patch` of `twilight_qa`. A value already stored keeps its single-precision
   digits.
 - **The version comes from the git tag** — `lsst-versions` reads it at build time, as in `drp_qa` and
-  `pfs_utils`; `pyproject.toml` no longer states one. A build from a clone without tags is `0.0.1.dev1`.
+  `pfs_utils`; `pyproject.toml` no longer states one. A tagged commit builds as its tag and a later one as a development
+  version of the next; a clone without the tags builds as a `0.0` development version.
 
 ### Removed
 
@@ -39,11 +40,16 @@ Revision `c9e4f2a6d813`. Goes with drp_qa from 0.5.0.
 - **`qa_gate.decided_by_task` and `provisional`** (PIPE2D-2013).
 
 What these held is not copied, and the downgrade brings the columns and tables back empty: take a dump before
-upgrading.
+upgrading. The downgrade also drops what the new tables and columns hold.
+
+### Fixed
+
+- **Column comments** (PIPE2D-2013) — `image_quality_qa.obs_type` and `calexp_run`,
+  `dm_line_residual_qa_metric.metric`, and `qa_gate.qa_decided_by` and `qa_reason` say what drp_qa 0.5.0 stores.
 
 ## [0.5.0] - 2026-11-10
 
-Revision `acbd1a9681d6`. Goes with drp_qa 0.3.1 to 0.4.1.
+Revision `acbd1a9681d6`. Goes with drp_qa 0.2.0 to 0.4.1.
 
 ### Added
 
@@ -104,3 +110,10 @@ Revision `f6f47983358a`.
 
 - **Tables for the DRP's QA** (PIPE2D-1385) — `data_processing_pipe2d`, `detector_map_qa`, `extraction_qa`,
   `flux_cal_qa` and the `sky_subtraction_qa_sa` tables.
+- **`data_qa.pipe2d_version`, `drp_qa_version`, `process_type`** (PIPE2D-1385).
+
+### Removed
+
+- **`data_processing`, `data_processing_results`, `sky_subtraction`, `flux_calibration`, `detector_map`**
+  (PIPE2D-1385).
+- **`data_qa.qa_version`, `qa_type`** (PIPE2D-1385).
