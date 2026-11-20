@@ -8,6 +8,9 @@ pip install .          # library: sqlalchemy and psycopg (3)
 pip install -e '.[dev]'  # plus alembic, pytest, pandas, ...
 ```
 
+The version comes from the git tags (`lsst-versions`): a tagged commit is that version, a later commit a
+development version of the next. Install from a clone that has the tags.
+
 Connect with a `postgresql+psycopg://user@host:port/dbname` URL. SQLAlchemy 2.1
 also accepts plain `postgresql://` for psycopg 3, but older versions map that to
 psycopg2, which is no longer installed.
@@ -20,3 +23,20 @@ changes on `main`: the Action creates the schema in a throwaway Postgres, draws
 it with [SchemaCrawler](https://www.schemacrawler.com/) and commits the PDF.
 Don't edit the PDF by hand; to redraw it without a models change, run the
 workflow from the Actions tab.
+
+## Migrations
+
+The qadb migrations are in `alembic/qadb`. `db.cfg` there (not committed) holds one line, the database URL;
+keep the password in `~/.pgpass`.
+
+```sh
+cd alembic/qadb
+echo 'postgresql+psycopg://pfs@<host>:<port>/qadb' > db.cfg
+PYTHONPATH=../../python alembic current
+PYTHONPATH=../../python alembic upgrade head
+```
+
+Stop whatever writes to the database first (qaActor's loader): a migration holds exclusive locks on the tables
+it changes until it commits. Take a dump before a migration that drops tables or columns: a downgrade restores
+the schema, not the rows.
+`CHANGELOG.md` says what each version changed and which revision brings a database to it.

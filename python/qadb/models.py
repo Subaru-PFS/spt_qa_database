@@ -981,7 +981,7 @@ class flux_cal_qa(Base):
 
 
 class image_quality_qa(Base):
-    '''imageQualityQa metrics and verdict per detector image (the Butler's iqQaMetrics)
+    '''imageQualityQa numbers per detector image (the Butler's iqQaMetrics); the verdict is in qa_gate
     '''
     __tablename__ = 'image_quality_qa'
 
@@ -1001,28 +1001,33 @@ class image_quality_qa(Base):
     spectrograph = Column(Integer)
     arm = Column(String(1))
     obs_type = Column(String,
-                      comment='frame type from W_SEQTYP: arc, trace, object, twilight, dark, ...')
+                      comment='the kind of frame as imageQualityQa records it, e.g. arc, trace, science, allsky, twilight or dark; the raw sequence type is seq_type')
     seq_name = Column(String,
                       comment='W_SEQNAM')
+    seq_type = Column(String,
+                      comment="the raw sequence type (W_SEQTYP; the opdb's iic_sequence.sequence_type), e.g. scienceArc, darks, fiberProfiles")
     illumination = Column(String,
                           comment='full (PFI fibers) or iis (the engineering fibers lit by the IIS)')
+    lamps = Column(String,
+                   comment='the lamps the header says were lit, as obs_pfs getLamps names them, sorted and joined with +, e.g. HgAr+Ne; empty when none')
     trace_only = Column(Boolean,
                         comment='FWHM read from the fiberProfiles calibration, not measured')
-    med_fwhm = Column(REAL, comment='median FWHM [pix]')
-    med_dx_center = Column(REAL, comment='median spatial offset from detectorMap_calib [pix]')
+    med_fwhm = Column(Float(precision=53), comment='median FWHM [pix]; double precision: the gate reads it')
+    med_dx_center = Column(Float(precision=53),
+                           comment='median spatial offset from detectorMap_calib [pix]; double precision: the gate reads it')
     dx_center_rms = Column(REAL, comment='RMS of the spatial offset [pix]')
     pct_flagged = Column(REAL, comment='per cent of lines flagged')
     pct_low_sn = Column(REAL, comment='per cent of lines flagged for low S/N')
     pct_meas_fail = Column(REAL, comment='per cent of lines whose measurement failed')
     n_lines = Column(Integer, comment='rows of lines')
-    lines_per_fiber = Column(REAL, comment='unflagged lamp lines (trace centroids on a quartz) per lit fiber')
+    lines_per_fiber = Column(Float(precision=53),
+                             comment='unflagged lamp lines (trace centroids on a quartz) per lit fiber; double precision: the gate reads it')
     n_lit_fibers = Column(Integer, comment='fibers of the detector the pfsConfig lights')
     n_fibers = Column(Integer, comment='fibers of the detector lit or behind a black dot')
     n_trace_rows = Column(Integer, comment='trace centroids in lines')
-    qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
-    qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
-    qa_reason = Column(String)
-    calexp_run = Column(String, comment='Butler RUN of the calexp judged')
+    n_saturated_lines = Column(Integer, comment='lamp or sky lines saturated at their expected position (the SAT mask plane of the calexp)')
+    pct_saturated_pixels = Column(REAL, comment="per cent of the pixels within the lit fibers' apertures that are saturated")
+    calexp_run = Column(String, comment='Butler RUN of the calexp measured')
     isr_bad_pixels = Column(Integer)
     isr_time = Column(REAL, comment='[s]')
     cosmic_ray_count = Column(Integer)
@@ -1067,7 +1072,7 @@ class image_quality_qa_species(Base):
 
 
 class dm_line_residual_qa(Base):
-    '''dmLineResiduals verdict per detector image (the Butler's dmLineResidualSummary)
+    '''dmLineResiduals summary per detector image (the Butler's dmLineResidualSummary); the verdict is in qa_gate
     '''
     __tablename__ = 'dm_line_residual_qa'
 
@@ -1086,14 +1091,11 @@ class dm_line_residual_qa(Base):
     arm = Column(String(1))
     camera_set = Column(String, comment='the arms the pfsConfig exposed, e.g. brn')
     obs_type = Column(String)
+    seq_type = Column(String,
+                      comment="the raw sequence type (W_SEQTYP; the opdb's iic_sequence.sequence_type), e.g. scienceArc, darks, fiberProfiles")
     fitted = Column(Boolean, comment='false when the visit detectorMap fit marked no line')
     n_species = Column(Integer)
     n_species_measured = Column(Integer)
-    qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
-    qa_decided_by = Column(String)
-    qa_reason = Column(String)
-    recommended_action = Column(String,
-                                comment='NOMINAL, APPLY_SHIFT, RECALIBRATE, INSUFFICIENT_DATA or UNJUDGED')
     calib_id = Column(String, comment='Butler dataset id of the detectorMap_calib')
     calib_run = Column(String, comment='Butler RUN of the detectorMap_calib')
     calib_created = Column(DateTime, comment='CALIB_CREATION_DATE of the detectorMap_calib (the header says the date alone)')
@@ -1122,69 +1124,12 @@ class dm_line_residual_qa_metric(Base):
     status_type = Column(String, primary_key=True, autoincrement=False,
                          comment='BOTH, USED, RESERVED or UNFITTED')
     metric = Column(String, primary_key=True, autoincrement=False,
-                    comment='nLines, linesPerFiber, medianDeltaX, robustRmsDeltaX, medianDeltaY, robustRmsDeltaY')
-    value = Column(REAL)
-    status = Column(String, comment='PASS, WARN or FAIL; empty when not judged')
-
-
-class qa_thresholds(Base):
-    '''A thresholds table the gate judged with: a file (pfs.drp.qa.metrics.calibration.writeThresholds), or a
-    task config's threshold fields written as one (pfs.drp.qa.metrics.gate.thresholdsDocument, PIPE2D-1991)
-    '''
-    __tablename__ = 'qa_thresholds'
-
-    thresholds_id = Column(Integer, primary_key=True, autoincrement=True)
-    sha256 = Column(String(64), unique=True, nullable=False,
-                    comment='of the file: the same thresholds registered twice are one row')
-    name = Column(String, comment='file name, e.g. iqQaThresholds-run25.yaml; <task>.config for a config layer')
-    derived_on = Column(DateTime, comment='the day the thresholds were derived (the file says the date alone)')
-    collection = Column(String, comment='the collection the thresholds were derived from')
-    reference_runs = Column(String, comment='comma-separated, e.g. 25,29')
-    drp_qa_version = Column(String)
-    datamodel_version = Column(String)
-    obs_pfs_version = Column(String)
-    drp_stella_version = Column(String)
-    n_entries = Column(Integer)
-    registered_at = Column(DateTime)
-
-
-class qa_threshold_entry(Base):
-    '''One metric and population of a thresholds file
-    '''
-    __tablename__ = 'qa_threshold_entry'
-
-    thresholds_id = Column(Integer,
-                           ForeignKey('qa_thresholds.thresholds_id', ondelete='CASCADE'),
-                           primary_key=True,
-                           autoincrement=False)
-    metric = Column(String, primary_key=True, autoincrement=False)
-    population = Column(String, primary_key=True, autoincrement=False,
-                        comment='the population as key=value pairs, e.g. arm=b obsType=arc')
-    arm = Column(String(1))
-    spectrograph = Column(Integer)
-    obs_type = Column(String)
-    description = Column(String)
-    camera_set = Column(String)
-    reference = Column(String)
-    status_type = Column(String)
-    illumination = Column(String,
-                          comment='null means the default, full: an entry that names no illumination judges PFI frames alone (drp_qa gate.DEFAULT_POPULATION)')
-    higher_is_worse = Column(Boolean)
-    absolute = Column(Boolean)
-    method = Column(String, comment='percentile or tolerance')
-    warn = Column(Float(precision=53), comment='double precision: the file value exactly')
-    fail = Column(Float(precision=53), comment='double precision: the file value exactly')
-    n_good = Column(Integer)
-    n_good_visits = Column(Integer)
-    visit_range = Column(String)
-    reliable = Column(Boolean)
-    fail_bounded = Column(Boolean)
-    degenerate = Column(Boolean)
-    provenance = Column(String)
+                    comment='nLines, linesPerFiber, medianDeltaX, robustRmsDeltaX, medianDeltaY, robustRmsDeltaY, medianDeltaYKms')
+    value = Column(Float(precision=53), comment='double precision: the gate reads it')
 
 
 class qa_gate(Base):
-    '''The per-image gate: the worst verdict of the QA tasks on a detector image
+    '''The per-image gate: one verdict per detector image, the worst of its checks (drp_qa's metrics.gate)
     '''
     __tablename__ = 'qa_gate'
 
@@ -1199,46 +1144,19 @@ class qa_gate(Base):
                           index=True)
     camera_name = Column(String(2), primary_key=True, autoincrement=False,
                          comment='arm and spectrograph, e.g. b1')
+    frame_type = Column(String,
+                        comment='the frame type the gate gave the image (drp_qa metrics.registry): one it judges, e.g. science, arc, quartz, twilight or iisArc, or one it does not, e.g. dark; null for a frame with no type, and for a verdict of the gate before the redesign')
     qa_status = Column(String, comment='PASS, WARN, FAIL or UNKNOWN')
-    decided_by_task = Column(String, comment='imageQualityQa, dmLineResiduals or twilightQa')
-    qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
-    qa_reason = Column(String, comment='every task reason, prefixed by its task')
-    provisional = Column(Boolean,
-                         comment='the reduction pipeline differs from the thresholds (gate.pipelineMismatch)')
+    qa_decided_by = Column(String, comment='the check that decided a WARN or FAIL')
+    qa_reason = Column(String, comment='the check, the value and the limit crossed; on UNKNOWN, why nothing was judged')
     mode = Column(String, comment='realtime, comparison or backfill')
     decided_at = Column(DateTime)
 
 
-class qa_processing_thresholds(Base):
-    '''Every thresholds layer a task judged a processing's images with, in the order judged (PIPE2D-1991)
-
-    A task judges each metric by the first of its layers with an entry for the image's population:
-    its thresholds file(s), then its config's threshold fields (qa_thresholds.name <task>.config).
-    A RUN has one config, so its images share their layers: one row per processing, task and layer,
-    keyed by the task's own processing (image_quality_qa.processing_id, dm_line_residual_qa.processing_id,
-    twilight_qa.processing_id). The one record of what judged an image: qa_gate's per-task
-    *_thresholds_id columns, which cited the first layer alone per image, went with it, so a metric a
-    later layer judged (the drift rows of dmLineResiduals, judged by the config's fields) has its limits
-    here like the rest.
-    '''
-    __tablename__ = 'qa_processing_thresholds'
-
-    processing_id = Column(Integer,
-                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
-                           primary_key=True,
-                           autoincrement=False)
-    task = Column(String, primary_key=True, autoincrement=False,
-                  comment='imageQualityQa, dmLineResiduals or twilightQa')
-    layer = Column(Integer, primary_key=True, autoincrement=False,
-                   comment='position in the order judged, from 0; a layer that could not be cited leaves a gap')
-    thresholds_id = Column(Integer, ForeignKey('qa_thresholds.thresholds_id'), nullable=False)
-
-
 class twilight_qa(Base):
-    '''The twilight sequence check on a detector image: drp_qa's twilightQa.py judges each exposure of a
-    twilight sequence against the sequence's others once it is complete (PIPE2D-1973, INSTRM-3089) and
-    stores the verdict per image as twilightQaMetrics; the loader copies it here and folds it into qa_gate
-    as the task twilightQa. Keyed like the other per-image tables, by the processing (collection and RUN).
+    '''The twilight sequence check on a detector image: drp_qa's loader measures each exposure of a
+    twilight sequence against the sequence's others once it is complete, and stores the numbers here; the
+    verdict is in qa_gate. Keyed like the other per-image tables, by the processing (collection and RUN).
     '''
     __tablename__ = 'twilight_qa'
 
@@ -1266,18 +1184,64 @@ class twilight_qa(Base):
     noise = Column(REAL, comment='photon noise expected in the RMS [%]')
     sat_fraction = Column(REAL, comment="largest saturated fraction of a fiber's window on the detector")
     n_measured = Column(Integer, comment='fibers of the detector with a measured flux in this exposure')
-    twilight_level_offset = Column(REAL,
-                                   comment="the detector's level against the sequence's, over the field's [%]; null with no measured fiber or no reference")
-    twilight_resid_rms = Column(REAL,
-                                comment="field RMS beyond photon noise against the sequence's other bright exposures [%]")
-    twilight_patch = Column(REAL,
-                            comment="deepest coherent deviation: largest |median| over a fiber's nearest neighbours [%]")
+    twilight_level_offset = Column(Float(precision=53),
+                                   comment="the detector's level against the sequence's, over the field's [%]; null with no measured fiber or no reference; double precision: the gate reads it")
+    twilight_resid_rms = Column(Float(precision=53),
+                                comment="field RMS beyond photon noise against the sequence's other bright exposures [%]; double precision: the gate reads it")
+    twilight_patch = Column(Float(precision=53),
+                            comment="deepest coherent deviation: largest |median| over a fiber's nearest neighbours [%]; double precision: the gate reads it")
     twilight_arm_mean = Column(REAL, comment="RMS of the mean of each fiber's b and r residuals [%]")
     twilight_arm_half_diff = Column(REAL, comment="RMS of half the difference of each fiber's b and r residuals [%]")
-    qa_status = Column(String,
-                       comment="PASS, WARN or FAIL: the worst of the detector's level offset and its arm's RMS and patch; UNKNOWN for an arm the thresholds leave out (n)")
-    qa_decided_by = Column(String, comment='the metric that decided a WARN or FAIL')
-    qa_reason = Column(String)
+
+
+class qa_normal_value(Base):
+    '''A camera's normal value of one metric, for one frame type and lamp or species: what the gate's
+    percentage checks compare with (drp_qa's metrics.normalValues). A frame is judged by the latest row
+    of its collection valid at or before its visit.
+    '''
+    __tablename__ = 'qa_normal_value'
+    __table_args__ = (
+        UniqueConstraint('collection_name', 'metric', 'camera', 'frame_type', 'selector', 'valid_from',
+                         name='uq_normal_value'),
+    )
+
+    normal_value_id = Column(Integer, primary_key=True, autoincrement=True)
+    collection_name = Column(String, nullable=False, comment='the collection whose frames the value judges')
+    metric = Column(String, nullable=False)
+    camera = Column(String, nullable=False, comment='a camera, e.g. b1; or an arm for a per-arm value')
+    frame_type = Column(String, nullable=False, server_default='',
+                        comment='the frame type the value is for, as in qa_gate')
+    selector = Column(String, nullable=False, server_default='', comment='lamp or species; empty when neither applies')
+    valid_from = Column(Integer, nullable=False, comment='the first visit the value judges')
+    value = Column(Float(precision=53), nullable=False)
+    n_frames = Column(Integer, nullable=False, comment='exposures the value rests on')
+    source_visits = Column(String, comment='the visits it was made from')
+    accepted_by = Column(String)
+    accepted_at = Column(DateTime)
+    reason = Column(String, comment='why a value beyond the limits was accepted')
+
+
+class detector_health_qa(Base):
+    '''Detector statistics the reduction records, per amplifier on the CCDs and per detector on the n arm,
+    long format: stored, not judged
+    '''
+    __tablename__ = 'detector_health_qa'
+
+    processing_id = Column(Integer,
+                           ForeignKey('data_processing_pipe2d.processing_id', ondelete='CASCADE'),
+                           primary_key=True,
+                           autoincrement=False)
+    pfs_visit_id = Column(Integer,
+                          ForeignKey('pfs_visit.pfs_visit_id'),
+                          primary_key=True,
+                          autoincrement=False,
+                          index=True)
+    camera_name = Column(String(2), primary_key=True, autoincrement=False,
+                         comment='arm and spectrograph, e.g. b1')
+    amplifier = Column(String, primary_key=True, autoincrement=False, server_default='',
+                       comment='amplifier name; empty for a statistic of the whole detector (the n arm)')
+    metric = Column(String, primary_key=True, autoincrement=False)
+    value = Column(Float(precision=53), comment='double precision: pixel counts are stored exactly')
 
 
 class cosmic_rays(Base):
