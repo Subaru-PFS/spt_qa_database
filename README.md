@@ -20,3 +20,22 @@ changes on `main`: the Action creates the schema in a throwaway Postgres, draws
 it with [SchemaCrawler](https://www.schemacrawler.com/) and commits the PDF.
 Don't edit the PDF by hand; to redraw it without a models change, run the
 workflow from the Actions tab.
+
+## Migrations
+
+The qadb migrations are in `alembic/qadb`. `db.cfg` there (not committed) holds one line, the database URL;
+keep the password in `~/.pgpass`.
+
+```sh
+cd alembic/qadb
+echo 'postgresql+psycopg://pfs@<host>:<port>/qadb' > db.cfg
+PYTHONPATH=../../python alembic current
+PYTHONPATH=../../python alembic upgrade head
+```
+
+Take a dump before a migration that drops tables or columns: a downgrade restores the schema, not the rows.
+
+| Version | Revision | Goes with |
+|---|---|---|
+| 0.6.0 | `c9e4f2a6d813` | drp_qa from 0.5.0: one verdict per image in `qa_gate`, `qa_normal_value`, no thresholds tables. Drops the verdict columns of the numbers tables and the three thresholds tables with their rows. |
+| 0.5.0 | `acbd1a9681d6` | drp_qa 0.3.1 to 0.4.1: `qa_processing_thresholds` |
