@@ -6,6 +6,20 @@ alembic revision (`alembic/qadb`) that brings a database to it.
 
 ## [Unreleased]
 
+## [0.7.0]
+
+Revision `3f9b7c1e5a24`. Goes with drp_qa from 0.9.0.
+
+### Removed
+
+- **`image_quality_qa`'s log-scraped columns** (PIPE2D-2016) — `isr_bad_pixels`, `isr_time`, `cosmic_ray_count`,
+  `cosmic_ray_pixels`, `cosmic_ray_time`, `reduce_exposure_time`, and the detectorMap fit scalars `fit_chi2`,
+  `fit_dof`, `fit_x_rms`, `fit_y_rms`, `fit_x_soften`, `fit_y_soften`, `fit_n_lines`, `fit_total_lines`,
+  `fit_reserved_chi2`, `fit_reserved_x_rms`, `fit_reserved_y_rms`, `fit_reserved_x_soften`,
+  `fit_reserved_y_soften`, `fit_reserved_n_lines`. `imageQualityQa` no longer parses logs: the fit scalars and
+  ISR/cosmic-ray counts are stored in `detector_health_qa` from the reduction's task metadata, and the per-species
+  fit statistics in `image_quality_qa_species`. Apply only after the drp_qa release that stops writing these columns.
+
 ## [0.6.0] - 2026-11-20
 
 Revision `c9e4f2a6d813`. Goes with drp_qa from 0.5.0.
