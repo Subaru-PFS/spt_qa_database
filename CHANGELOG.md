@@ -6,6 +6,13 @@ alembic revision (`alembic/qadb`) that brings a database to it.
 
 ## [Unreleased]
 
+### Added
+
+- **`slit_offset_confirmed`** (PIPE2D-1677) — one row per fiber whose slit offset is a cross-arm
+  outlier in a run's `detectorMap_calib` (drp_qa `metrics.slitOffsets`), keyed by the observing
+  `run` with `collection_name` as provenance, so a rebuild or reprocessing replaces a run's rows.
+  `drpQa.py redo` writes it; the run-to-run trajectory is read from it. Revision `b2d4f6a8c019`.
+
 ## [0.7.0] - 2026-11-22
 
 Revision `3f9b7c1e5a24`. Goes with drp_qa from 0.10.0.

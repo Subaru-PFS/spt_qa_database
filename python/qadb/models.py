@@ -1224,6 +1224,36 @@ class detector_health_qa(Base):
     value = Column(Float(precision=53), comment='double precision: pixel counts are stored exactly')
 
 
+class slit_offset_confirmed(Base):
+    '''A fiber whose slit offset is a cross-arm outlier in a run's detectorMap_calib: an outlier
+    within its MTP ferrule in two or more arms of its spectrograph (drp_qa's
+    metrics.slitOffsets.crossArmConfirmed). One row per (observing run, spectrograph, fiber); the
+    run-to-run trajectory, which separates a chronic bad fiber from a lasting step or build wobble,
+    is read from this table. Keyed by the observing run, not the Butler collection, so a rebuild or
+    reprocessing replaces a run's rows rather than adding a set. A snapshot under the outlier
+    threshold in force; re-made if that changes, and always rebuildable from the detectorMap_calib.
+    '''
+    __tablename__ = 'slit_offset_confirmed'
+    __table_args__ = (
+        UniqueConstraint('run', 'spectrograph', 'fiber_id', name='uq_slit_offset_confirmed'),
+    )
+
+    slit_offset_confirmed_id = Column(Integer, primary_key=True, autoincrement=True)
+    run = Column(String, nullable=False, comment='the observing run, e.g. run31 (the key)')
+    collection_name = Column(String, nullable=False,
+                             comment='the detectorMap_calib collection the offsets came from (provenance)')
+    spectrograph = Column(Integer, nullable=False)
+    fiber_id = Column(Integer, nullable=False)
+    n_arms = Column(Integer, nullable=False,
+                    comment='arms of the spectrograph the fiber is an outlier in (>=2)')
+    arms = Column(String, nullable=False, comment='those arms, e.g. b,m,n,r')
+    max_spatial_resid = Column(Float(precision=53),
+                               comment='largest |spatial offset - MTP median| over the arms, pixels')
+    max_spectral_resid = Column(Float(precision=53),
+                                comment='largest |spectral offset - MTP median| over the arms, pixels')
+    created_at = Column(DateTime, comment='when the row was written')
+
+
 class cosmic_rays(Base):
     '''Quality of the cosmic rays detection for the visit
     '''
